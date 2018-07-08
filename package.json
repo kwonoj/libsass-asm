@@ -22,7 +22,18 @@
     ]
   },
   "scripts": {
-    "prepare": "node -r ts-node/register bootstrap.ts"
+    "prepare": "node -r ts-node/register bootstrap.ts",
+    "prepublishOnly": "npm-run-all build test",
+    "precommit": "lint-staged",
+    "prepush": "npm-run-all build test",
+    "commitmsg": "commitlint -e",
+    "test": "echo not",
+    "lint": "tslint -c tslint.json -p tsconfig.json \"src/**/*.ts\" \"spec/**/*.ts\"",
+    "lint:staged": "lint-staged",
+    "build": "shx rm -rf ./dist && tsc && shx cp -r ./src/lib ./dist/src",
+    "build:clean": "shx rm -rf ./dist",
+    "commit": "git-cz -S",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"
   },
   "repository": {
     "type": "git",
