@@ -1,5 +1,5 @@
 {
-  "name": "sass-asm",
+  "name": "libsass-asm",
   "version": "0.0.1",
   "description": "WebAssembly based javascript bindings for libsass",
   "main": "./dist/src/index.js",
@@ -26,7 +26,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kwonoj/sass-asm.git"
+    "url": "git+https://github.com/kwonoj/libsass-asm.git"
   },
   "keywords": [
     "WebAssembly",
@@ -37,9 +37,9 @@
   "author": "OJ Kwon <kwon.ohjoong@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/kwonoj/sass-asm/issues"
+    "url": "https://github.com/kwonoj/libsass-asm/issues"
   },
-  "homepage": "https://github.com/kwonoj/sass-asm#readme",
+  "homepage": "https://github.com/kwonoj/libsass-asm#readme",
   "dependencies": {
     "emscripten-wasm-loader": "^1.0.0",
     "tslib": "^1.9.3"
