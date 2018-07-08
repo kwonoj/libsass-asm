@@ -1,0 +1,71 @@
+{
+  "name": "sass-asm",
+  "version": "0.0.1",
+  "description": "WebAssembly based javascript bindings for libsass",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "engines": {
+    "npm": ">=3.0.0",
+    "node": ">=8.0.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    },
+    "libsass-version": "3.5.4-180708-2"
+  },
+  "lint-staged": {
+    "*.{ts,js}": [
+      "prettier --write --single-quote --print-width 120 --jsx-bracket-same-line true --ignore-path ./src/lib/*.js",
+      "tslint --fix",
+      "git add"
+    ]
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kwonoj/sass-asm.git"
+  },
+  "keywords": [
+    "WebAssembly",
+    "Wasm",
+    "sass",
+    "libsass"
+  ],
+  "author": "OJ Kwon <kwon.ohjoong@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kwonoj/sass-asm/issues"
+  },
+  "homepage": "https://github.com/kwonoj/sass-asm#readme",
+  "dependencies": {
+    "emscripten-wasm-loader": "^1.0.0",
+    "tslib": "^1.9.3"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^7.0.0",
+    "@commitlint/config-angular": "^7.0.1",
+    "@types/chai": "^4.1.4",
+    "@types/jest": "^23.1.4",
+    "@types/node": "^10.5.2",
+    "@types/shelljs": "^0.8.0",
+    "chai": "^4.1.2",
+    "commitizen": "^2.10.1",
+    "conventional-changelog-cli": "^2.0.1",
+    "cz-conventional-changelog": "^2.1.0",
+    "husky": "^0.14.3",
+    "jest": "^23.3.0",
+    "lint-staged": "^7.2.0",
+    "npm-run-all": "^4.1.3",
+    "prettier": "^1.13.7",
+    "shelljs": "^0.8.2",
+    "shx": "^0.3.1",
+    "ts-jest": "^23.0.0",
+    "ts-node": "^7.0.0",
+    "tslint": "^5.10.0",
+    "tslint-no-unused-expression-chai": "^0.1.3",
+    "typescript": "^2.9.2"
+  }
+}
