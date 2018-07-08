@@ -1,0 +1,47 @@
+{
+  "name": "sass-asm",
+  "version": "0.0.1",
+  "description": "WebAssembly based javascript bindings for libsass",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "engines": {
+    "npm": ">=3.0.0",
+    "node": ">=8.0.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    },
+    "libsass-version": "3.5.4-180708-2"
+  },
+  "lint-staged": {
+    "*.{ts,js}": [
+      "prettier --write --single-quote --print-width 120 --jsx-bracket-same-line true --ignore-path ./src/lib/*.js",
+      "tslint --fix",
+      "git add"
+    ]
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kwonoj/sass-asm.git"
+  },
+  "keywords": [
+    "WebAssembly",
+    "Wasm",
+    "sass",
+    "libsass"
+  ],
+  "author": "OJ Kwon <kwon.ohjoong@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kwonoj/sass-asm/issues"
+  },
+  "homepage": "https://github.com/kwonoj/sass-asm#readme",
+  "dependencies": {
+    "emscripten-wasm-loader": "^1.0.0",
+    "tslib": "^1.9.3"
+  }
+}
