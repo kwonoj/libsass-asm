@@ -24,9 +24,7 @@
     "no-consecutive-blank-lines": [
       true
     ],
-    "no-console": [
-      true
-    ],
+
     "no-trailing-whitespace": true,
     "no-duplicate-variable": true,
     "no-var-keyword": true,
