@@ -15,12 +15,11 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "pretty": true,
-    "target": "es5",
+    "target": "es2017",
     "outDir": "dist",
     "lib": [
       "es5",
-      "es2015",
-      "dom"
+      "es2017"
     ],
     "typeRoots" : ["./node_modules/@types"]
   },
