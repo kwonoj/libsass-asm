@@ -8,6 +8,9 @@
     "npm": ">=3.0.0",
     "node": ">=8.0.0"
   },
+  "bin": {
+    "sass": "dist/src/cli.js"
+  },
   "config": {
     "commitizen": {
       "path": "cz-conventional-changelog"
@@ -52,6 +55,8 @@
   },
   "homepage": "https://github.com/kwonoj/libsass-asm#readme",
   "dependencies": {
+    "command-line-args": "^5.0.2",
+    "command-line-usage": "^5.0.5",
     "emscripten-wasm-loader": "^1.0.0",
     "tslib": "^1.9.3"
   },
@@ -59,6 +64,8 @@
     "@commitlint/cli": "^7.0.0",
     "@commitlint/config-angular": "^7.0.1",
     "@types/chai": "^4.1.4",
+    "@types/command-line-args": "^5.0.0",
+    "@types/command-line-usage": "^5.0.1",
     "@types/jest": "^23.1.4",
     "@types/node": "^10.5.2",
     "@types/shelljs": "^0.8.0",
