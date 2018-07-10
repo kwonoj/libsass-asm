@@ -4,9 +4,29 @@ import { wrapSassOptions } from './wrapSassOptions';
 
 interface SassOptionsInterface {
   /**
+   * Property accessor to `sass_option_(get|set)_precision`
+   */
+  precision: number;
+
+  /**
+   * Property accessor to `sass_option_(get|set)_output_style`
+   */
+  outputStyle: OutputStyle;
+
+  /**
    * Release allocated memory with created instance.
    */
   dispose(): void;
+}
+
+/**
+ * Supported output style.
+ */
+enum OutputStyle {
+  SASS_STYLE_NESTED,
+  SASS_STYLE_EXPANDED,
+  SASS_STYLE_COMPACT,
+  SASS_STYLE_COMPRESSED
 }
 
 /**
@@ -45,10 +65,17 @@ class SassOptions implements SassOptionsInterface {
     this.cwrapOptions.option_set_precision(this.sassOptionsPtr, precision);
   }
 
+  public get outputStyle(): OutputStyle {
+    return this.cwrapOptions.option_get_output_style(this.sassOptionsPtr);
+  }
+  public set outputStyle(style: OutputStyle) {
+    this.cwrapOptions.option_set_output_style(this.sassOptionsPtr, style);
+  }
+
   public dispose(): void {
     this.cwrapCtx.delete_options(this.sassOptionsPtr);
     log(`SassOptions: disposed instance`);
   }
 }
 
-export { SassOptionsInterface, SassOptions };
+export { SassOptionsInterface, SassOptions, OutputStyle };
