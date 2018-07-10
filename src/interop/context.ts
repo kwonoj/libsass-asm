@@ -27,7 +27,7 @@ const wrapContextInterface = (cwrap: cwrapSignature) => ({
   //void sass_delete_compiler (struct Sass_Compiler* compiler);
   delete_compiler: null,
   //void sass_delete_options(struct Sass_Options* options);
-  delete_options: null,
+  delete_options: cwrap<(sassOptionsPtr: number) => void>(`sass_delete_options`, null, ['number']),
 
   //void sass_delete_file_context (struct Sass_File_Context* ctx);
   delete_file_context: null,
@@ -99,6 +99,22 @@ const wrapContextInterface = (cwrap: cwrapSignature) => ({
   context_take_source_map_string: null
 });
 
+const buildOptionInterface = (_asmModule: SassAsmModule, wrapped: ReturnType<typeof wrapContextInterface>) => {
+  const { make_options, delete_options } = wrapped;
+
+  const create = () => {
+    const optionsPtr = make_options();
+
+    return {
+      dispose: () => delete_options(optionsPtr)
+    };
+  };
+
+  return {
+    create
+  };
+};
+
 /**
  * Create interop interface around context.
  * (https://github.com/sass/libsass/blob/master/docs/api-context.md)
@@ -107,8 +123,14 @@ const wrapContextInterface = (cwrap: cwrapSignature) => ({
  */
 const buildContext = (asmModule: SassAsmModule) => {
   const { cwrap } = asmModule;
-  wrapContextInterface(cwrap);
+  const wrapped = wrapContextInterface(cwrap);
   //noop
+
+  const options = buildOptionInterface(asmModule, wrapped);
+
+  return {
+    options
+  };
 };
 
 export { buildContext };
