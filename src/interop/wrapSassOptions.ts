@@ -11,7 +11,7 @@ const wrapSassOptions = (cwrap: cwrapSignature) => ({
     'number'
   ]),
   //bool sass_option_get_source_comments (struct Sass_Options* options);
-  option_get_source_comments: cwrap<(sassOptionsPtr: number) => boolean>(`sass_option_get_source_comments`, 'number', [
+  option_get_source_comments: cwrap<(sassOptionsPtr: number) => boolean>(`sass_option_get_source_comments`, 'boolean', [
     'number'
   ]),
   //bool sass_option_get_source_map_embed (struct Sass_Options* options);
@@ -23,7 +23,11 @@ const wrapSassOptions = (cwrap: cwrapSignature) => ({
   //bool sass_option_get_omit_source_map_url (struct Sass_Options* options);
   option_get_omit_source_map_url: null,
   //bool sass_option_get_is_indented_syntax_src (struct Sass_Options* options);
-  option_get_is_indented_syntax_src: null,
+  option_get_is_indented_syntax_src: cwrap<(sassOptionsPtr: number) => boolean>(
+    `sass_option_get_is_indented_syntax_src`,
+    'boolean',
+    ['number']
+  ),
   //const char* sass_option_get_indent (struct Sass_Options* options);
   option_get_indent: null,
   //const char* sass_option_get_linefeed (struct Sass_Options* options);
@@ -63,7 +67,11 @@ const wrapSassOptions = (cwrap: cwrapSignature) => ({
     ['number', 'number']
   ),
   //void sass_option_set_source_comments (struct Sass_Options* options, bool source_comments);
-  option_set_source_comments: null,
+  option_set_source_comments: cwrap<(sassOptionsPtr: number, enabled: boolean) => void>(
+    `sass_option_set_source_comments`,
+    null,
+    ['number', 'boolean']
+  ),
   //void sass_option_set_source_map_embed (struct Sass_Options* options, bool source_map_embed);
   option_set_source_map_embed: null,
   //void sass_option_set_source_map_contents (struct Sass_Options* options, bool source_map_contents);
@@ -73,7 +81,11 @@ const wrapSassOptions = (cwrap: cwrapSignature) => ({
   //void sass_option_set_omit_source_map_url (struct Sass_Options* options, bool omit_source_map_url);
   option_set_omit_source_map_url: null,
   //void sass_option_set_is_indented_syntax_src (struct Sass_Options* options, bool is_indented_syntax_src);
-  option_set_is_indented_syntax_src: null,
+  option_set_is_indented_syntax_src: cwrap<(sassOptionsPtr: number, isIndented: boolean) => void>(
+    `sass_option_set_is_indented_syntax_src`,
+    null,
+    ['number', 'boolean']
+  ),
   //void sass_option_set_indent (struct Sass_Options* options, const char* indent);
   option_set_indent: null,
   //void sass_option_set_linefeed (struct Sass_Options* options, const char* linefeed);
