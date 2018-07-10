@@ -24,6 +24,22 @@ interface SassOptionsInterface {
   isIndentedSyntaxSrc: boolean;
 
   /**
+   * Property accessor to `sass_option_(get|set)_omit_source_map_url`
+   */
+  omitMapComment: boolean;
+
+  /**
+   * Push include path for compilation.
+   * @param {string} includePath path to be inlcluded
+   */
+  addIncludePath(includePath: string): void;
+  /**
+   * Push include path for plugin.
+   * @param {string} pluginPath path to be inlcluded
+   */
+  addPluginPath(pluginPath: string): void;
+
+  /**
    * Release allocated memory with created instance.
    */
   dispose(): void;
@@ -98,7 +114,25 @@ class SassOptions implements SassOptionsInterface {
     this.cwrapOptions.option_set_is_indented_syntax_src(this.sassOptionsPtr, isIndented);
   }
 
+  public get omitMapComment(): boolean {
+    return !!this.cwrapOptions.option_get_omit_source_map_url(this.sassOptionsPtr);
+  }
+
+  public set omitMapComment(isOmitted: boolean) {
+    this.cwrapOptions.option_set_omit_source_map_url(this.sassOptionsPtr, isOmitted);
+  }
+
+  public addIncludePath(_includePath: string): void {
+    //TODO: allocate string, mount path
+    //this.cwrapOptions.option_push_include_path(this.sassOptionsPtr);
+  }
+
+  public addPluginPath(_pluginPath: string): void {
+    //this.cwrapOptions.option_push_plugin_path(this.sassOptionsPtr);
+  }
+
   public dispose(): void {
+    //TODO: unmount path
     this.cwrapCtx.delete_options(this.sassOptionsPtr);
     log(`SassOptions: disposed instance`);
   }
