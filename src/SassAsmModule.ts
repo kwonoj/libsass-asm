@@ -2,7 +2,11 @@
 type stringToUTF8Signature = (str: string, outPtr: number, maxBytesToWrite: number) => void;
 
 /** @internal */
-type cwrapSignature = <T = Function>(fn: string, returnType: string | null, parameterType: Array<string>) => T;
+type cwrapSignature = <T = Function>(
+  fn: string,
+  returnType: 'number' | 'string' | 'array' | null,
+  parameterType?: Array<string>
+) => T;
 
 /** @internal */
 type FILESYSTEMS = {
