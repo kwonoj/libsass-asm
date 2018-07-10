@@ -16,6 +16,7 @@
     "importHelpers": true,
     "pretty": true,
     "target": "es2017",
+    "resolveJsonModule": true,
     "outDir": "dist",
     "lib": [
       "es5",
