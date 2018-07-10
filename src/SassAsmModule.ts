@@ -1,12 +1,9 @@
 /** @internal */
 type stringToUTF8Signature = (str: string, outPtr: number, maxBytesToWrite: number) => void;
 
+type argType = 'number' | 'string' | 'array' | 'boolean';
 /** @internal */
-type cwrapSignature = <T = Function>(
-  fn: string,
-  returnType: 'number' | 'string' | 'array' | null,
-  parameterType?: Array<string>
-) => T;
+type cwrapSignature = <T = Function>(fn: string, returnType: argType | null, parameterType?: Array<argType>) => T;
 
 /** @internal */
 type FILESYSTEMS = {
