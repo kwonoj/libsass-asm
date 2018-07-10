@@ -80,17 +80,25 @@ const buildSassOption = (context: ReturnType<typeof buildContext>, options: comm
         case 'stdin':
           break;
         case 'style':
+          const style = styleOptions.indexOf(value);
+          if (style < 0) {
+            throw new Error(`Unexpected value '${value}' for style`);
+          }
+          sassOption.outputStyle = style;
           break;
         case 'lineNumbers':
           sassOption.sourceComments = true;
           break;
         case 'loadPath':
+          sassOption.addIncludePath(value);
           break;
         case 'pluginPath':
+          sassOption.addPluginPath(value);
           break;
         case 'sourcemap':
           break;
         case 'omitMapComment':
+          sassOption.omitMapComment = true;
           break;
         case 'precision':
           sassOption.precision = parseInt(value, 10);
@@ -104,7 +112,7 @@ const buildSassOption = (context: ReturnType<typeof buildContext>, options: comm
   return sassOption;
 };
 
-(async () => {
+const main = async () => {
   const options = commandLineArgs(optionDefinitions, { camelCase: true });
   const displayHelp = options.help || Object.keys(options).length === 0;
   const displayVersion = options.version;
@@ -123,4 +131,13 @@ const buildSassOption = (context: ReturnType<typeof buildContext>, options: comm
   const sassOption = buildSassOption(context, options);
 
   sassOption.dispose();
+};
+
+(async () => {
+  try {
+    await main();
+  } catch (error) {
+    console.log(error);
+    process.exit(-1);
+  }
 })();
