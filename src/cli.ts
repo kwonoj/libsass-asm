@@ -1,19 +1,10 @@
 #!/usr/bin/env node
 import chalk from 'chalk';
 import * as commandLineArgs from 'command-line-args';
+import { OutputStyle } from './index';
 import './verbose';
 
-/**
- * Supported output style. Mirrors `style_option_strings[]` in sassc
- * (https://github.com/sass/sassc/blob/6a64d0569205bfcf0794a473f97affcb60b22fcc/sassc.c#L184-L189)
- */
-enum StyleOption {
-  SASS_STYLE_COMPRESSED = 'compressed',
-  SASS_STYLE_COMPACT = 'compact',
-  SASS_STYLE_EXPANDED = 'expanded',
-  SASS_STYLE_NESTED = 'nested'
-}
-
+const styleOptions = ['nested', 'expanded', 'compact', 'compressed'];
 /**
  * Definitions of available command line args.
  */
@@ -22,7 +13,7 @@ const optionDefinitions = [
   {
     name: 'style',
     alias: 't',
-    description: `Output style. Can be: ${(Object as any).values(StyleOption).join(', ')}.`
+    description: `Output style. Can be: ${styleOptions.join(', ')}.`
   },
   { name: 'line-numbers', alias: 'l', description: 'Emit comments showing original line numbers.' },
   { name: 'load-path', alias: 'I', description: 'Set Sass import path.' },
@@ -80,4 +71,12 @@ const buildDisplayVersion = async () => {
     console.log(usage);
     return;
   }
+
+  const { loadModule } = await import('./loadModule');
+  const { context } = await loadModule();
+  const sassOption = context.options.create();
+  sassOption.outputStyle = OutputStyle.SASS_STYLE_NESTED;
+  sassOption.precision = 5;
+
+  sassOption.dispose();
 })();
