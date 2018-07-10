@@ -26,7 +26,15 @@ const optionDefinitions = [
   { name: 'precision', alias: 'p', description: 'Set the precision for numbers.', type: Number },
   { name: 'sass', alias: 'a', description: 'Treat input as indented syntax.', type: Boolean },
   { name: 'version', alias: 'v', description: 'Display compiled versions.', type: Boolean },
-  { name: 'help', alias: 'h', description: 'Display this help message.', type: Boolean }
+  { name: 'help', alias: 'h', description: 'Display this help message.', type: Boolean },
+  {
+    name: 'files',
+    description:
+      'Specifies files for in order of [INPUT] [OUTPUT] \n' + `Do not need to explicitly specify --files args`,
+    type: String,
+    multiple: true,
+    defaultOption: true
+  }
 ];
 
 /**
@@ -129,6 +137,11 @@ const main = async () => {
   const { loadModule } = await import('./loadModule');
   const { context } = await loadModule();
   const sassOption = buildSassOption(context, options);
+
+  const files: Array<string> = options.files || [];
+  if (files.length > 2) {
+    throw new Error(`Unexpected arguments provided, '${files.slice(2)}'`);
+  }
 
   sassOption.dispose();
 };
