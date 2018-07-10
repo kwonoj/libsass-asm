@@ -21,7 +21,11 @@ const wrapSassOptions = (cwrap: cwrapSignature) => ({
   //bool sass_option_get_source_map_file_urls (struct Sass_Options* options);
   option_get_source_map_file_urls: null,
   //bool sass_option_get_omit_source_map_url (struct Sass_Options* options);
-  option_get_omit_source_map_url: null,
+  option_get_omit_source_map_url: cwrap<(sassOptionsPtr: number) => boolean>(
+    `sass_option_get_omit_source_map_url`,
+    'boolean',
+    ['number']
+  ),
   //bool sass_option_get_is_indented_syntax_src (struct Sass_Options* options);
   option_get_is_indented_syntax_src: cwrap<(sassOptionsPtr: number) => boolean>(
     `sass_option_get_is_indented_syntax_src`,
@@ -79,7 +83,11 @@ const wrapSassOptions = (cwrap: cwrapSignature) => ({
   //void sass_option_set_source_map_file_urls (struct Sass_Options* options, bool source_map_file_urls);
   option_set_source_map_file_urls: null,
   //void sass_option_set_omit_source_map_url (struct Sass_Options* options, bool omit_source_map_url);
-  option_set_omit_source_map_url: null,
+  option_set_omit_source_map_url: cwrap<(sassOptionsPtr: number, isOmitted: boolean) => void>(
+    `sass_option_set_omit_source_map_url`,
+    null,
+    ['number', 'boolean']
+  ),
   //void sass_option_set_is_indented_syntax_src (struct Sass_Options* options, bool is_indented_syntax_src);
   option_set_is_indented_syntax_src: cwrap<(sassOptionsPtr: number, isIndented: boolean) => void>(
     `sass_option_set_is_indented_syntax_src`,
