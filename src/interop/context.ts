@@ -5,7 +5,7 @@ import { cwrapSignature, SassAsmModule } from '../SassAsmModule';
  */
 const wrapContextInterface = (cwrap: cwrapSignature) => ({
   //struct Sass_Options* sass_make_options (void);
-  make_options: cwrap<() => number>(`sass_make_options`, 'number', []),
+  make_options: cwrap<() => number>(`sass_make_options`, 'number'),
 
   //struct Sass_File_Context* sass_make_file_context (const char* input_path);
   make_file_context: null,
