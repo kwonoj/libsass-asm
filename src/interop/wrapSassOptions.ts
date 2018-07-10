@@ -5,9 +5,11 @@ import { cwrapSignature } from '../SassAsmModule';
  */
 const wrapSassOptions = (cwrap: cwrapSignature) => ({
   //int sass_option_get_precision (struct Sass_Options* options);
-  option_get_precision: cwrap<(sassOptionsPtr: number) => number>(`option_get_precision`, 'number', ['number']),
+  option_get_precision: cwrap<(sassOptionsPtr: number) => number>(`sass_option_get_precision`, 'number', ['number']),
   //enum Sass_Output_Style sass_option_get_output_style (struct Sass_Options* options);
-  option_get_output_style: null,
+  option_get_output_style: cwrap<(sassOptionsPtr: number) => number>(`sass_option_get_output_style`, 'number', [
+    'number'
+  ]),
   //bool sass_option_get_source_comments (struct Sass_Options* options);
   option_get_source_comments: cwrap<(sassOptionsPtr: number) => boolean>(`sass_option_get_source_comments`, 'number', [
     'number'
@@ -55,7 +57,11 @@ const wrapSassOptions = (cwrap: cwrapSignature) => ({
     'number'
   ]),
   //void sass_option_set_output_style (struct Sass_Options* options, enum Sass_Output_Style output_style);
-  option_set_output_style: null,
+  option_set_output_style: cwrap<(sassOptionsPtr: number, style: number) => void>(
+    `sass_option_set_output_style`,
+    null,
+    ['number', 'number']
+  ),
   //void sass_option_set_source_comments (struct Sass_Options* options, bool source_comments);
   option_set_source_comments: null,
   //void sass_option_set_source_map_embed (struct Sass_Options* options, bool source_map_embed);
