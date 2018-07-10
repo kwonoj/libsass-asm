@@ -1,3 +1,4 @@
+import { buildContext } from './interop/context';
 import { getVersion } from './interop/miscellaneous';
 import { SassAsmModule } from './SassAsmModule';
 import { SassFactory } from './SassFactory';
@@ -10,6 +11,7 @@ import { SassFactory } from './SassFactory';
  */
 export const sassLoader = (asmModule: SassAsmModule): SassFactory => {
   return {
-    getVersion: getVersion(asmModule)
+    getVersion: getVersion(asmModule),
+    context: buildContext(asmModule)
   };
 };
