@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import chalk from 'chalk';
 import * as commandLineArgs from 'command-line-args';
+import './verbose';
 
 /**
  * Supported output style. Mirrors `style_option_strings[]` in sassc
@@ -35,6 +36,17 @@ const optionDefinitions = [
 ];
 
 /**
+ * Definitions of help display for command line options.
+ */
+const helpDefinitions = [
+  { header: chalk.reset('Options'), optionList: optionDefinitions },
+  {
+    header: chalk.reset('Enabling verbose debug log'),
+    content: [`Set 'DEBUG' environment variable to any to enable debug log`, '$ DEBUG=* sass ...']
+  }
+];
+
+/**
  * Get usage definition for library version.
  *
  */
@@ -43,29 +55,29 @@ const buildDisplayVersion = async () => {
   const sassFactory = await loadModule();
   const { libsassAsm, libsass, sassLang, sass2scss } = await sassFactory.getVersion();
 
-  return {
-    header: chalk.reset('Version'),
-    content: [
-      { name: 'libsass-asm', summary: libsassAsm },
-      { name: 'libsass', summary: libsass },
-      { name: 'sass', summary: sassLang },
-      { name: 'sass2scss', summary: sass2scss }
-    ]
-  };
+  return [
+    {
+      header: chalk.reset('Version'),
+      content: [
+        { name: 'libsass-asm', summary: libsassAsm },
+        { name: 'libsass', summary: libsass },
+        { name: 'sass', summary: sassLang },
+        { name: 'sass2scss', summary: sass2scss }
+      ]
+    }
+  ];
 };
 
 (async () => {
   const options = commandLineArgs(optionDefinitions, { camelCase: true });
-
+  //(options as any).test();
   const displayHelp = options.help || Object.keys(options).length === 0;
   const displayVersion = options.version;
 
   if (displayHelp || displayVersion) {
     const cmdUsage = await import('command-line-usage');
-    const usageDefinition = displayHelp
-      ? { header: chalk.reset('Options'), optionList: optionDefinitions }
-      : await buildDisplayVersion();
-    const usage = cmdUsage([usageDefinition]);
+    const usageDefinition = displayHelp ? helpDefinitions : await buildDisplayVersion();
+    const usage = cmdUsage([...usageDefinition]);
     console.log(usage);
     return;
   }
