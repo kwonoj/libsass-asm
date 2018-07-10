@@ -70,7 +70,6 @@ const buildDisplayVersion = async () => {
 
 (async () => {
   const options = commandLineArgs(optionDefinitions, { camelCase: true });
-  //(options as any).test();
   const displayHelp = options.help || Object.keys(options).length === 0;
   const displayVersion = options.version;
 
