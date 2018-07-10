@@ -14,6 +14,16 @@ interface SassOptionsInterface {
   outputStyle: OutputStyle;
 
   /**
+   * Property accessor to `sass_option_(get|set)_source_comments`
+   */
+  sourceComments: boolean;
+
+  /**
+   * Property accessor to `sass_option_(get|set)_is_indented_syntax_src`
+   */
+  isIndentedSyntaxSrc: boolean;
+
+  /**
    * Release allocated memory with created instance.
    */
   dispose(): void;
@@ -70,6 +80,22 @@ class SassOptions implements SassOptionsInterface {
   }
   public set outputStyle(style: OutputStyle) {
     this.cwrapOptions.option_set_output_style(this.sassOptionsPtr, style);
+  }
+
+  public get sourceComments(): boolean {
+    return !!this.cwrapOptions.option_get_source_comments(this.sassOptionsPtr);
+  }
+
+  public set sourceComments(enabled: boolean) {
+    this.cwrapOptions.option_set_source_comments(this.sassOptionsPtr, enabled);
+  }
+
+  public get isIndentedSyntaxSrc(): boolean {
+    return !!this.cwrapOptions.option_get_is_indented_syntax_src(this.sassOptionsPtr);
+  }
+
+  public set isIndentedSyntaxSrc(isIndented: boolean) {
+    this.cwrapOptions.option_set_is_indented_syntax_src(this.sassOptionsPtr, isIndented);
   }
 
   public dispose(): void {
