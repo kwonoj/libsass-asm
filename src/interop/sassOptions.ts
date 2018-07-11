@@ -1,3 +1,4 @@
+import { mountDirectory, unmount } from 'emscripten-wasm-loader';
 import { log } from '../util/logger';
 import { wrapSassContext } from './wrapSassContext';
 import { wrapSassOptions } from './wrapSassOptions';
@@ -68,6 +69,10 @@ class SassOptions implements SassOptionsInterface {
    */
   private readonly sassOptionsPtr: number;
   /**
+   * List of virtual mounted path.
+   */
+  private readonly mountedPath: Array<string> = [];
+  /**
    * Construct new instance of SassOptions.
    *
    * @param {ReturnType<typeof wrapSassContext>} cwrapCtx cwrapped function object to sass context api.
@@ -78,7 +83,9 @@ class SassOptions implements SassOptionsInterface {
    */
   constructor(
     private readonly cwrapCtx: ReturnType<typeof wrapSassContext>,
-    private readonly cwrapOptions: ReturnType<typeof wrapSassOptions>
+    private readonly cwrapOptions: ReturnType<typeof wrapSassOptions>,
+    private readonly mount: ReturnType<typeof mountDirectory>,
+    private readonly unmountPath: ReturnType<typeof unmount>
   ) {
     this.sassOptionsPtr = cwrapCtx.make_options();
     log(`SassOptions: created new instance`, { sassOptionsPtr: this.sassOptionsPtr });
@@ -122,8 +129,9 @@ class SassOptions implements SassOptionsInterface {
     this.cwrapOptions.option_set_omit_source_map_url(this.sassOptionsPtr, isOmitted);
   }
 
-  public addIncludePath(_includePath: string): void {
-    //TODO: allocate string, mount path
+  public addIncludePath(includePath: string): void {
+    this.mount(includePath);
+    //TODO: allocate string
     //this.cwrapOptions.option_push_include_path(this.sassOptionsPtr);
   }
 
@@ -132,8 +140,9 @@ class SassOptions implements SassOptionsInterface {
   }
 
   public dispose(): void {
-    //TODO: unmount path
     this.cwrapCtx.delete_options(this.sassOptionsPtr);
+    this.mountedPath.forEach(p => this.unmountPath(p));
+
     log(`SassOptions: disposed instance`);
   }
 }
