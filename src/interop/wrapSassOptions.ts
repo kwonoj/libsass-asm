@@ -116,9 +116,16 @@ const wrapSassOptions = (cwrap: cwrapSignature) => ({
   option_set_importer: null,
 
   //void sass_option_push_plugin_path (struct Sass_Options* options, const char* path);
-  option_push_plugin_path: null,
+  option_push_plugin_path: cwrap<(sassOptionsPtr: number, path: number) => void>(`sass_option_push_plugin_path`, null, [
+    'number',
+    'number'
+  ]),
   //void sass_option_push_include_path (struct Sass_Options* options, const char* path);
-  option_push_include_path: null,
+  option_push_include_path: cwrap<(sassOptionsPtr: number, path: number) => void>(
+    `sass_option_push_include_path`,
+    null,
+    ['number', 'number']
+  ),
 
   //char* sass_find_file (const char* path, struct Sass_Options* opt);
   find_file: null,

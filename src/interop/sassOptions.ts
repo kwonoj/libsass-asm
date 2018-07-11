@@ -85,7 +85,8 @@ class SassOptions implements SassOptionsInterface {
     private readonly cwrapCtx: ReturnType<typeof wrapSassContext>,
     private readonly cwrapOptions: ReturnType<typeof wrapSassOptions>,
     private readonly mount: ReturnType<typeof mountDirectory>,
-    private readonly unmountPath: ReturnType<typeof unmount>
+    private readonly unmountPath: ReturnType<typeof unmount>,
+    private readonly allocString: (value: string) => number
   ) {
     this.sassOptionsPtr = cwrapCtx.make_options();
     log(`SassOptions: created new instance`, { sassOptionsPtr: this.sassOptionsPtr });
@@ -130,13 +131,17 @@ class SassOptions implements SassOptionsInterface {
   }
 
   public addIncludePath(includePath: string): void {
-    this.mount(includePath);
-    //TODO: allocate string
-    //this.cwrapOptions.option_push_include_path(this.sassOptionsPtr);
+    const mounted = this.mount(includePath);
+    this.mountedPath.push(mounted);
+
+    this.cwrapOptions.option_push_include_path(this.sassOptionsPtr, this.allocString(mounted));
   }
 
-  public addPluginPath(_pluginPath: string): void {
-    //this.cwrapOptions.option_push_plugin_path(this.sassOptionsPtr);
+  public addPluginPath(pluginPath: string): void {
+    const mounted = this.mount(pluginPath);
+    this.mountedPath.push(mounted);
+
+    this.cwrapOptions.option_push_plugin_path(this.sassOptionsPtr, this.allocString(mounted));
   }
 
   public dispose(): void {
