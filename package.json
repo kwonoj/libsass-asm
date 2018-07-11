@@ -15,7 +15,7 @@
     "commitizen": {
       "path": "cz-conventional-changelog"
     },
-    "libsass-version": "3.5.4-180709.2"
+    "libsass-version": "3.5.4-180710"
   },
   "lint-staged": {
     "*.{ts,js}": [
@@ -58,7 +58,7 @@
     "command-line-args": "^5.0.2",
     "command-line-usage": "^5.0.5",
     "debug": "^3.1.0",
-    "emscripten-wasm-loader": "^1.0.0",
+    "emscripten-wasm-loader": "^2.0.0",
     "source-map-support": "^0.5.6",
     "tslib": "^1.9.3"
   },
