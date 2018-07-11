@@ -1,4 +1,4 @@
-import { cwrapSignature } from '../SassAsmModule';
+import { cwrapSignature } from 'emscripten-wasm-loader';
 
 /**
  * Creates cwrapped interface for options api.
