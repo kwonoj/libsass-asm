@@ -1,4 +1,7 @@
+import { mountDirectory, unmount } from 'emscripten-wasm-loader';
+import * as nanoid from 'nanoid';
 import { SassAsmModule } from '../SassAsmModule';
+import { log } from '../util/logger';
 import { SassOptions, SassOptionsInterface } from './sassOptions';
 import { wrapSassContext } from './wrapSassContext';
 import { wrapSassOptions } from './wrapSassOptions';
@@ -10,13 +13,27 @@ import { wrapSassOptions } from './wrapSassOptions';
  * @param asmModule
  */
 const buildContext = (asmModule: SassAsmModule) => {
-  const { cwrap } = asmModule;
+  const { cwrap, FS, stackAlloc, stringToUTF8 } = asmModule;
   const cwrapCtx = wrapSassContext(cwrap);
   const cwrapOptions = wrapSassOptions(cwrap);
 
+  const allocString = (value: string) => {
+    const len = (value.length << 2) + 1;
+    const ret = stackAlloc(len);
+    stringToUTF8(value, ret, len);
+    return ret;
+  };
+
+  const nodePathId = `/${nanoid(45)}`;
+  FS.mkdir(nodePathId);
+  log(`buildContext: root mounting point created`, { nodePathId });
+
+  const mountPath = mountDirectory(FS, nodePathId);
+  const unmountPath = unmount(FS, nodePathId);
+
   return {
     options: {
-      create: () => new SassOptions(cwrapCtx, cwrapOptions) as SassOptionsInterface
+      create: () => new SassOptions(cwrapCtx, cwrapOptions, mountPath, unmountPath, allocString) as SassOptionsInterface
     }
   };
 };

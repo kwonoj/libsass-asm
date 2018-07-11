@@ -1,3 +1,4 @@
+import { mountDirectory, unmount } from 'emscripten-wasm-loader';
 import { log } from '../util/logger';
 import { wrapSassContext } from './wrapSassContext';
 import { wrapSassOptions } from './wrapSassOptions';
@@ -22,6 +23,22 @@ interface SassOptionsInterface {
    * Property accessor to `sass_option_(get|set)_is_indented_syntax_src`
    */
   isIndentedSyntaxSrc: boolean;
+
+  /**
+   * Property accessor to `sass_option_(get|set)_omit_source_map_url`
+   */
+  omitMapComment: boolean;
+
+  /**
+   * Push include path for compilation.
+   * @param {string} includePath path to be inlcluded
+   */
+  addIncludePath(includePath: string): void;
+  /**
+   * Push include path for plugin.
+   * @param {string} pluginPath path to be inlcluded
+   */
+  addPluginPath(pluginPath: string): void;
 
   /**
    * Release allocated memory with created instance.
@@ -52,6 +69,10 @@ class SassOptions implements SassOptionsInterface {
    */
   private readonly sassOptionsPtr: number;
   /**
+   * List of virtual mounted path.
+   */
+  private readonly mountedPath: Array<string> = [];
+  /**
    * Construct new instance of SassOptions.
    *
    * @param {ReturnType<typeof wrapSassContext>} cwrapCtx cwrapped function object to sass context api.
@@ -62,7 +83,10 @@ class SassOptions implements SassOptionsInterface {
    */
   constructor(
     private readonly cwrapCtx: ReturnType<typeof wrapSassContext>,
-    private readonly cwrapOptions: ReturnType<typeof wrapSassOptions>
+    private readonly cwrapOptions: ReturnType<typeof wrapSassOptions>,
+    private readonly mount: ReturnType<typeof mountDirectory>,
+    private readonly unmountPath: ReturnType<typeof unmount>,
+    private readonly allocString: (value: string) => number
   ) {
     this.sassOptionsPtr = cwrapCtx.make_options();
     log(`SassOptions: created new instance`, { sassOptionsPtr: this.sassOptionsPtr });
@@ -98,8 +122,32 @@ class SassOptions implements SassOptionsInterface {
     this.cwrapOptions.option_set_is_indented_syntax_src(this.sassOptionsPtr, isIndented);
   }
 
+  public get omitMapComment(): boolean {
+    return !!this.cwrapOptions.option_get_omit_source_map_url(this.sassOptionsPtr);
+  }
+
+  public set omitMapComment(isOmitted: boolean) {
+    this.cwrapOptions.option_set_omit_source_map_url(this.sassOptionsPtr, isOmitted);
+  }
+
+  public addIncludePath(includePath: string): void {
+    const mounted = this.mount(includePath);
+    this.mountedPath.push(mounted);
+
+    this.cwrapOptions.option_push_include_path(this.sassOptionsPtr, this.allocString(mounted));
+  }
+
+  public addPluginPath(pluginPath: string): void {
+    const mounted = this.mount(pluginPath);
+    this.mountedPath.push(mounted);
+
+    this.cwrapOptions.option_push_plugin_path(this.sassOptionsPtr, this.allocString(mounted));
+  }
+
   public dispose(): void {
     this.cwrapCtx.delete_options(this.sassOptionsPtr);
+    this.mountedPath.forEach(p => this.unmountPath(p));
+
     log(`SassOptions: disposed instance`);
   }
 }

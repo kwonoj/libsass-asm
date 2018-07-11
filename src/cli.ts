@@ -26,7 +26,15 @@ const optionDefinitions = [
   { name: 'precision', alias: 'p', description: 'Set the precision for numbers.', type: Number },
   { name: 'sass', alias: 'a', description: 'Treat input as indented syntax.', type: Boolean },
   { name: 'version', alias: 'v', description: 'Display compiled versions.', type: Boolean },
-  { name: 'help', alias: 'h', description: 'Display this help message.', type: Boolean }
+  { name: 'help', alias: 'h', description: 'Display this help message.', type: Boolean },
+  {
+    name: 'files',
+    description:
+      'Specifies files for in order of [INPUT] [OUTPUT] \n' + `Do not need to explicitly specify --files args`,
+    type: String,
+    multiple: true,
+    defaultOption: true
+  }
 ];
 
 /**
@@ -80,17 +88,25 @@ const buildSassOption = (context: ReturnType<typeof buildContext>, options: comm
         case 'stdin':
           break;
         case 'style':
+          const style = styleOptions.indexOf(value);
+          if (style < 0) {
+            throw new Error(`Unexpected value '${value}' for style`);
+          }
+          sassOption.outputStyle = style;
           break;
         case 'lineNumbers':
           sassOption.sourceComments = true;
           break;
         case 'loadPath':
+          sassOption.addIncludePath(value);
           break;
         case 'pluginPath':
+          sassOption.addPluginPath(value);
           break;
         case 'sourcemap':
           break;
         case 'omitMapComment':
+          sassOption.omitMapComment = true;
           break;
         case 'precision':
           sassOption.precision = parseInt(value, 10);
@@ -104,7 +120,7 @@ const buildSassOption = (context: ReturnType<typeof buildContext>, options: comm
   return sassOption;
 };
 
-(async () => {
+const main = async () => {
   const options = commandLineArgs(optionDefinitions, { camelCase: true });
   const displayHelp = options.help || Object.keys(options).length === 0;
   const displayVersion = options.version;
@@ -122,5 +138,19 @@ const buildSassOption = (context: ReturnType<typeof buildContext>, options: comm
   const { context } = await loadModule();
   const sassOption = buildSassOption(context, options);
 
+  const files: Array<string> = options.files || [];
+  if (files.length > 2) {
+    throw new Error(`Unexpected arguments provided, '${files.slice(2)}'`);
+  }
+
   sassOption.dispose();
+};
+
+(async () => {
+  try {
+    await main();
+  } catch (error) {
+    console.log(error);
+    process.exit(-1);
+  }
 })();
