@@ -173,7 +173,10 @@ const writeCompileResult = async (
   return 1;
 };
 
-const compileStdin = (..._args: Array<any>) => {
+const compileStdin = async (..._args: Array<any>) => {
+  const stdin = await import('get-stdin');
+  await stdin();
+
   return -1;
 };
 
@@ -239,7 +242,7 @@ const main = async (argv: Array<string> = process.argv) => {
   const [inputPath, outputPath] = files;
   const sassOption = buildSassOption(factory.context, options, outputPath);
   const result = options.stdin
-    ? compileStdin(factory, sassOption, outputPath)
+    ? await compileStdin(factory, sassOption, outputPath)
     : await compile(factory, sassOption, inputPath, outputPath);
 
   sassOption.dispose();
