@@ -2,8 +2,11 @@
 import chalk from 'chalk';
 import * as commandLineArgs from 'command-line-args';
 import * as debug from 'debug';
+import * as path from 'path';
 import { OutputStyle } from './index';
 import { buildContext } from './interop/context';
+import { SassOptionsInterface } from './interop/options/sassOptions';
+import { SassFactory } from './SassFactory';
 import './verbose';
 
 const d = debug('libsass:cli');
@@ -135,6 +138,26 @@ const buildSassOption = (
   return sassOption;
 };
 
+const compileStdin = (..._args: Array<any>) => {
+  return -1;
+};
+
+const compile = (factory: SassFactory, _option: SassOptionsInterface, inFile: string, outFile: string) => {
+  const { interop, context } = factory;
+  const mountedPath = [inFile, outFile].map(p => path.dirname(p)).map(dir => {
+    d(`mount directory '${dir}'`);
+    return interop.mount(dir);
+  });
+
+  context.file.create();
+
+  mountedPath.forEach(dir => {
+    interop.unmount(dir);
+    d(`unmount directory '${dir}'`);
+  });
+  return -1;
+};
+
 const main = async (argv: Array<string> = process.argv) => {
   const options = commandLineArgs(optionDefinitions, { argv, camelCase: true });
   const displayHelp = options.help || Object.keys(options).length === 0;
@@ -150,16 +173,20 @@ const main = async (argv: Array<string> = process.argv) => {
   }
 
   const { loadModule } = await import('./loadModule');
-  const { context } = await loadModule();
+  const factory = await loadModule();
   const files: Array<string> = options.files || [];
   if (files.length > 2) {
     throw new Error(`Unexpected arguments provided, '${files.slice(2)}'`);
   }
 
-  const [, outFile] = files;
-  const sassOption = buildSassOption(context, options, outFile);
+  const [inFile, outFile] = files;
+  const sassOption = buildSassOption(factory.context, options, outFile);
+  const result = options.stdin
+    ? compileStdin(factory, sassOption, outFile)
+    : compile(factory, sassOption, inFile, outFile);
 
   sassOption.dispose();
+  process.exit(result);
 };
 
 (async () => {
