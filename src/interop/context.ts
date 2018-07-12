@@ -22,7 +22,7 @@ const buildContext = (
       create: () => new SassOptions(cwrapContext, cwrapOptions, mount, unmount, str) as SassOptionsInterface
     },
     file: {
-      create: () => new SassFileContext() as SassFileContextInterface
+      create: (inputPath: string) => new SassFileContext(inputPath, cwrapContext, str) as SassFileContextInterface
     }
   };
 };
