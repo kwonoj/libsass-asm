@@ -1,5 +1,6 @@
 import { mountDirectory, unmount } from 'emscripten-wasm-loader';
 import { log } from '../../util/logger';
+import { StringMethodInterface } from '../interopUtility';
 import { wrapSassContext } from '../wrapSassContext';
 import { wrapSassOptions } from './wrapSassOptions';
 
@@ -112,10 +113,7 @@ class SassOptions implements SassOptionsInterface {
     private readonly cwrapOptions: ReturnType<typeof wrapSassOptions>,
     private readonly mount: ReturnType<typeof mountDirectory>,
     private readonly unmountPath: ReturnType<typeof unmount>,
-    private readonly strMethod: {
-      alloc: (value: string) => number;
-      ptrToString: (value: number) => string;
-    }
+    private readonly strMethod: StringMethodInterface
   ) {
     this.sassOptionsPtr = cwrapCtx.make_options();
     log(`SassOptions: created new instance`, { sassOptionsPtr: this.sassOptionsPtr });
