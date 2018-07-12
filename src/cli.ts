@@ -142,19 +142,50 @@ const compileStdin = (..._args: Array<any>) => {
   return -1;
 };
 
-const compile = (factory: SassFactory, _option: SassOptionsInterface, inFile: string, outFile: string) => {
+const compile = (
+  factory: SassFactory,
+  options: SassOptionsInterface,
+  inputPath: string,
+  outputPath: string | undefined
+) => {
   const { interop, context } = factory;
-  const mountedPath = [inFile, outFile].map(p => path.dirname(p)).map(dir => {
-    d(`mount directory '${dir}'`);
-    return interop.mount(dir);
-  });
+  const mountedPath = [inputPath, outputPath]
+    .filter(x => !!x)
+    .map(p => path.dirname(p!))
+    .map(dir => {
+      d(`mount directory '${dir}'`);
+      return interop.mount(dir);
+    });
 
-  context.file.create();
+  if (!!outputPath) {
+    options.outputPath = outputPath;
+  }
+
+  const sourceMapFile = options.sourceMapFile;
+  options.inputPath = inputPath;
+  const fileContext = context.file.create(inputPath);
+  const sassContext = fileContext.getContext();
+  fileContext.options = options;
+  fileContext.compile();
+
+  const status = sassContext.errorStatus;
+  const message = sassContext.errorMessage;
+  const output = sassContext.outputString;
+
+  const resultCode = 0;
+  d(`compiled`, { status, message, output });
+
+  if (resultCode === 0 && !!sourceMapFile) {
+    const map = sassContext.sourceMapString;
+    d(`map`, { map });
+  }
 
   mountedPath.forEach(dir => {
     interop.unmount(dir);
     d(`unmount directory '${dir}'`);
   });
+
+  fileContext.dispose();
   return -1;
 };
 
@@ -179,11 +210,11 @@ const main = async (argv: Array<string> = process.argv) => {
     throw new Error(`Unexpected arguments provided, '${files.slice(2)}'`);
   }
 
-  const [inFile, outFile] = files;
-  const sassOption = buildSassOption(factory.context, options, outFile);
+  const [inputPath, outputPath] = files;
+  const sassOption = buildSassOption(factory.context, options, outputPath);
   const result = options.stdin
-    ? compileStdin(factory, sassOption, outFile)
-    : compile(factory, sassOption, inFile, outFile);
+    ? compileStdin(factory, sassOption, outputPath)
+    : compile(factory, sassOption, inputPath, outputPath);
 
   sassOption.dispose();
   process.exit(result);
