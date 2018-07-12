@@ -41,9 +41,11 @@ const wrapSassOptions = (cwrap: cwrapSignature) => ({
   //const char* sass_option_get_linefeed (struct Sass_Options* options);
   option_get_linefeed: null,
   //const char* sass_option_get_input_path (struct Sass_Options* options);
-  option_get_input_path: null,
+  option_get_input_path: cwrap<(sassOptionsPtr: number) => number>(`sass_option_get_input_path`, 'number', ['number']),
   //const char* sass_option_get_output_path (struct Sass_Options* options);
-  option_get_output_path: null,
+  option_get_output_path: cwrap<(sassOptionsPtr: number) => number>(`sass_option_get_output_path`, 'number', [
+    'number'
+  ]),
   //const char* sass_option_get_source_map_file (struct Sass_Options* options);
   option_get_source_map_file: cwrap<(sassOptionsPtr: number) => number>(`sass_option_get_source_map_file`, 'number', [
     'number'
@@ -109,9 +111,16 @@ const wrapSassOptions = (cwrap: cwrapSignature) => ({
   //void sass_option_set_linefeed (struct Sass_Options* options, const char* linefeed);
   option_set_linefeed: null,
   //void sass_option_set_input_path (struct Sass_Options* options, const char* input_path);
-  option_set_input_path: null,
+  option_set_input_path: cwrap<(sassOptionsPtr: number, outPath: number) => void>(`sass_option_set_input_path`, null, [
+    'number',
+    'number'
+  ]),
   //void sass_option_set_output_path (struct Sass_Options* options, const char* output_path);
-  option_set_output_path: null,
+  option_set_output_path: cwrap<(sassOptionsPtr: number, outPath: number) => void>(
+    `sass_option_set_output_path`,
+    null,
+    ['number', 'number']
+  ),
   //void sass_option_set_plugin_path (struct Sass_Options* options, const char* plugin_path);
   option_set_plugin_path: null,
   //void sass_option_set_include_path (struct Sass_Options* options, const char* include_path);

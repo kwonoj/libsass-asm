@@ -8,7 +8,7 @@ const wrapSassContext = (cwrap: cwrapSignature) => ({
   make_options: cwrap<() => number>(`sass_make_options`, 'number'),
 
   //struct Sass_File_Context* sass_make_file_context (const char* input_path);
-  make_file_context: null,
+  make_file_context: cwrap<(inputPath: number) => number>(`sass_make_file_context`, 'number', ['number']),
   //struct Sass_Data_Context* sass_make_data_context (char* source_string);
   make_data_context: null,
 
@@ -33,23 +33,31 @@ const wrapSassContext = (cwrap: cwrapSignature) => ({
   delete_options: cwrap<(sassOptionsPtr: number) => void>(`sass_delete_options`, null, ['number']),
 
   //void sass_delete_file_context (struct Sass_File_Context* ctx);
-  delete_file_context: null,
+  delete_file_context: cwrap<(sassFileContextptr: number) => void>(`sass_delete_file_context`, null, ['number']),
   //void sass_delete_data_context (struct Sass_Data_Context* ctx);
   delete_data_context: null,
 
   //struct Sass_Context* sass_file_context_get_context (struct Sass_File_Context* file_ctx);
-  file_context_get_context: null,
+  file_context_get_context: cwrap<(sassFileCtxPtr: number) => number>(`sass_file_context_get_context`, 'number', [
+    'number'
+  ]),
   //struct Sass_Context* sass_data_context_get_context (struct Sass_Data_Context* data_ctx);
   data_context_get_context: null,
 
   //struct Sass_Options* sass_context_get_options (struct Sass_Context* ctx);
   context_get_options: null,
   //struct Sass_Options* sass_file_context_get_options (struct Sass_File_Context* file_ctx);
-  file_context_get_options: null,
+  file_context_get_options: cwrap<(sassFileCtxPtr: number) => number>(`sass_file_context_get_options`, 'number', [
+    'number'
+  ]),
   //struct Sass_Options* sass_data_context_get_options (struct Sass_Data_Context* data_ctx);
   data_context_get_options: null,
   //void sass_file_context_set_options (struct Sass_File_Context* file_ctx, struct Sass_Options* opt);
-  file_context_set_options: null,
+  file_context_set_options: cwrap<(sassFileCtxPtr: number, sassOptionsPtr: number) => void>(
+    `sass_file_context_set_options`,
+    null,
+    ['number', 'number']
+  ),
   //void sass_data_context_set_options (struct Sass_Data_Context* data_ctx, struct Sass_Options* opt);
   data_context_set_options: null,
 
