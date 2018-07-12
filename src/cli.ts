@@ -2,9 +2,12 @@
 import chalk from 'chalk';
 import * as commandLineArgs from 'command-line-args';
 import * as debug from 'debug';
+import * as fs from 'fs';
 import * as path from 'path';
+import * as util from 'util';
 import { OutputStyle } from './index';
 import { buildContext } from './interop/context';
+import { SassContextInterface } from './interop/file/sassContext';
 import { SassOptionsInterface } from './interop/options/sassOptions';
 import { SassFactory } from './SassFactory';
 import './verbose';
@@ -138,11 +141,43 @@ const buildSassOption = (
   return sassOption;
 };
 
+const writeCompileResult = async (
+  context: SassContextInterface,
+  outputPath: string | undefined,
+  sourceMapFile: string | undefined
+) => {
+  const { errorStatus, errorMessage, outputString, sourceMapString } = context;
+
+  const write = async (outputPath: string, content: string) => {
+    if (errorStatus > 0) {
+      console.log(errorMessage || `An error occurred; no error message available.\n`);
+      return 1;
+    }
+    try {
+      await util.promisify(fs.writeFile)(outputPath, content, 'utf-8');
+      console.log(content);
+      return 0;
+    } catch (e) {
+      console.log(`Filed to write output to ${outputPath}`, { e });
+      return 2;
+    }
+  };
+
+  if (outputPath) {
+    const outputResult = await write(outputPath, outputString);
+    if (outputResult === 0 && sourceMapFile) {
+      return await write(sourceMapFile, sourceMapString);
+    }
+    return outputResult;
+  }
+  return 1;
+};
+
 const compileStdin = (..._args: Array<any>) => {
   return -1;
 };
 
-const compile = (
+const compile = async (
   factory: SassFactory,
   options: SassOptionsInterface,
   inputPath: string,
@@ -168,17 +203,7 @@ const compile = (
   fileContext.options = options;
   fileContext.compile();
 
-  const status = sassContext.errorStatus;
-  const message = sassContext.errorMessage;
-  const output = sassContext.outputString;
-
-  const resultCode = 0;
-  d(`compiled`, { status, message, output });
-
-  if (resultCode === 0 && !!sourceMapFile) {
-    const map = sassContext.sourceMapString;
-    d(`map`, { map });
-  }
+  const result = await writeCompileResult(sassContext, outputPath, sourceMapFile);
 
   mountedPath.forEach(dir => {
     interop.unmount(dir);
@@ -186,7 +211,8 @@ const compile = (
   });
 
   fileContext.dispose();
-  return -1;
+
+  return result;
 };
 
 const main = async (argv: Array<string> = process.argv) => {
@@ -214,7 +240,7 @@ const main = async (argv: Array<string> = process.argv) => {
   const sassOption = buildSassOption(factory.context, options, outputPath);
   const result = options.stdin
     ? compileStdin(factory, sassOption, outputPath)
-    : compile(factory, sassOption, inputPath, outputPath);
+    : await compile(factory, sassOption, inputPath, outputPath);
 
   sassOption.dispose();
   process.exit(result);
