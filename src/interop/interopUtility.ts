@@ -3,6 +3,11 @@ import * as nanoid from 'nanoid';
 import { SassAsmModule } from '../SassAsmModule';
 import { log } from '../util/logger';
 
+interface StringMethodInterface {
+  alloc(value: string): number;
+  ptrToString(value: number): string;
+}
+
 /**
  * Construct few utility function to be used interop between raw libsass interface.
  *
@@ -11,7 +16,7 @@ import { log } from '../util/logger';
 const buildInteropUtility = (asmModule: SassAsmModule) => {
   const { FS, stackAlloc, stringToUTF8, Pointer_stringify } = asmModule;
 
-  const str = {
+  const str: StringMethodInterface = {
     alloc: (value: string) => {
       const len = (value.length << 2) + 1;
       const ret = stackAlloc(len);
@@ -34,4 +39,4 @@ const buildInteropUtility = (asmModule: SassAsmModule) => {
   };
 };
 
-export { buildInteropUtility };
+export { buildInteropUtility, StringMethodInterface };

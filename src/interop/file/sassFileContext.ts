@@ -1,6 +1,8 @@
 import { log } from '../../util/logger';
+import { StringMethodInterface } from '../interopUtility';
 import { SassOptions, SassOptionsInterface } from '../options/sassOptions';
 import { wrapSassContext } from '../wrapSassContext';
+import { SassContext, SassContextInterface } from './sassContext';
 
 interface SassFileContextInterface {
   /**
@@ -28,14 +30,12 @@ interface SassFileContextInterface {
 class SassFileContext implements SassFileContextInterface {
   private readonly sassFileContextPtr: number;
   private sassOptions: SassOptionsInterface | null;
+  private sassContext: SassContextInterface | null;
 
   constructor(
     inputPath: string,
     private readonly cwrapCtx: ReturnType<typeof wrapSassContext>,
-    private readonly strMethod: {
-      alloc: (value: string) => number;
-      ptrToString: (value: number) => string;
-    }
+    private readonly strMethod: StringMethodInterface
   ) {
     const inputPathPtr = this.strMethod.alloc(inputPath);
     this.sassFileContextPtr = this.cwrapCtx.make_file_context(inputPathPtr);
@@ -66,13 +66,18 @@ class SassFileContext implements SassFileContextInterface {
   }
 
   public getContext(): SassContextInterface {
-    this.cwrapCtx.file_context_get_context(this.sassFileContextPtr);
+    const sassContextPtr = this.cwrapCtx.file_context_get_context(this.sassFileContextPtr);
+    if (!!this.sassContext && (this.sassContext as SassContext).sassContextPtr !== sassContextPtr) {
+      throw new Error(`Unexpected: context has changed`);
+    }
 
-    throw new Error('m');
+    return !!this.sassContext
+      ? this.sassContext
+      : (this.sassContext = new SassContext(sassContextPtr, this.cwrapCtx, this.strMethod) as SassContextInterface);
   }
 
-  public compile(): void {
-    throw new Error('meh');
+  public compile(): number {
+    return this.cwrapCtx.compile_file_context(this.sassFileContextPtr);
   }
 
   public dispose(): void {

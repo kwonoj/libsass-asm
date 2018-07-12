@@ -13,7 +13,9 @@ const wrapSassContext = (cwrap: cwrapSignature) => ({
   make_data_context: null,
 
   //int sass_compile_file_context (struct Sass_File_Context* ctx);
-  compile_file_context: null,
+  compile_file_context: cwrap<(sassFileContextptr: number) => number>(`sass_compile_file_context`, 'number', [
+    'number'
+  ]),
   //int sass_compile_data_context (struct Sass_Data_Context* ctx);
   compile_data_context: null,
 
@@ -62,15 +64,25 @@ const wrapSassContext = (cwrap: cwrapSignature) => ({
   data_context_set_options: null,
 
   //const char* sass_context_get_output_string (struct Sass_Context* ctx);
-  context_get_output_string: null,
+  context_get_output_string: cwrap<(sassContextPtr: number) => number>(`sass_context_get_output_string`, 'number', [
+    'number'
+  ]),
   //int sass_context_get_error_status (struct Sass_Context* ctx);
-  context_get_error_status: null,
+  context_get_error_status: cwrap<(sassContextPtr: number) => number>(`sass_context_get_error_status`, 'number', [
+    'number'
+  ]),
   //const char* sass_context_get_error_json (struct Sass_Context* ctx);
-  context_get_error_json: null,
+  context_get_error_json: cwrap<(sassContextPtr: number) => number>(`sass_context_get_error_json`, 'number', [
+    'number'
+  ]),
   //const char* sass_context_get_error_text (struct Sass_Context* ctx);
-  context_get_error_text: null,
+  context_get_error_text: cwrap<(sassContextPtr: number) => number>(`sass_context_get_error_text`, 'number', [
+    'number'
+  ]),
   //const char* sass_context_get_error_message (struct Sass_Context* ctx);
-  context_get_error_message: null,
+  context_get_error_message: cwrap<(sassContextPtr: number) => number>(`sass_context_get_error_message`, 'number', [
+    'number'
+  ]),
   //const char* sass_context_get_error_file (struct Sass_Context* ctx);
   context_get_error_file: null,
   //size_t sass_context_get_error_line (struct Sass_Context* ctx);
@@ -78,7 +90,11 @@ const wrapSassContext = (cwrap: cwrapSignature) => ({
   //size_t sass_context_get_error_column (struct Sass_Context* ctx);
   context_get_error_column: null,
   //const char* sass_context_get_source_map_string (struct Sass_Context* ctx);
-  context_get_source_map_string: null,
+  context_get_source_map_string: cwrap<(sassContextPtr: number) => number>(
+    `sass_context_get_source_map_string`,
+    'number',
+    ['number']
+  ),
   //char** sass_context_get_included_files (struct Sass_Context* ctx);
   context_get_included_files: null,
 
