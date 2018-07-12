@@ -40,18 +40,32 @@ interface SassOptionsInterface {
   sourceMapFile: string;
 
   /**
+   * Property accessor to `sass_option_(get|set)_output_path`
+   */
+  outputPath: string;
+  /**
+   * Property accessor to `sass_option_(get|set)_input_path`
+   */
+  inputPath: string;
+
+  /**
    * Push include path for compilation.
+   * Accessor to sass_option_push_include_path
+   *
    * @param {string} includePath path to be inlcluded
    */
   addIncludePath(includePath: string): void;
   /**
    * Push include path for plugin.
+   * Accessor to sass_option_push_plugin_path
+   *
    * @param {string} pluginPath path to be inlcluded
    */
   addPluginPath(pluginPath: string): void;
 
   /**
    * Release allocated memory with created instance.
+   * Accessor to sass_delete_options
    */
   dispose(): void;
 }
@@ -76,8 +90,10 @@ enum OutputStyle {
 class SassOptions implements SassOptionsInterface {
   /**
    * Raw pointer to `struct Sass_Options*`
+   * @internal
    */
-  private readonly sassOptionsPtr: number;
+  public readonly sassOptionsPtr: number;
+
   /**
    * List of virtual mounted path.
    */
@@ -158,6 +174,24 @@ class SassOptions implements SassOptionsInterface {
 
   public set sourceMapFile(mapFile: string) {
     this.cwrapOptions.option_set_source_map_file(this.sassOptionsPtr, this.strMethod.alloc(mapFile));
+  }
+
+  public get outputPath(): string {
+    const outPathPtr = this.cwrapOptions.option_get_output_path(this.sassOptionsPtr);
+    return this.strMethod.ptrToString(outPathPtr);
+  }
+
+  public set outputPath(outPath: string) {
+    this.cwrapOptions.option_set_output_path(this.sassOptionsPtr, this.strMethod.alloc(outPath));
+  }
+
+  public get inputPath(): string {
+    const inputPathPtr = this.cwrapOptions.option_get_input_path(this.sassOptionsPtr);
+    return this.strMethod.ptrToString(inputPathPtr);
+  }
+
+  public set inputPath(outPath: string) {
+    this.cwrapOptions.option_set_input_path(this.sassOptionsPtr, this.strMethod.alloc(outPath));
   }
 
   public addIncludePath(includePath: string): void {
