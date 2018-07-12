@@ -7,7 +7,7 @@
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
-import { exec, mkdir, rm } from 'shelljs';
+import { exec, rm } from 'shelljs';
 import { promisify } from 'util';
 //tslint:disable-next-line: no-require-imports no-var-requires
 const { config } = require('./package.json');
@@ -38,7 +38,7 @@ const getRemoteChecksum = (url: string) => {
  * Main script execution
  */
 (async () => {
-  const libPath = path.resolve('./src/lib');
+  const libPath = path.resolve('./src/bin');
   const fileName = 'libsass.js';
   const localBinarypath = path.join(libPath, fileName);
 
@@ -55,11 +55,10 @@ const getRemoteChecksum = (url: string) => {
 
   console.log(`Downloading libsass wasm binary version '${version}'`);
 
-  rm('-rf', libPath);
-  mkdir(libPath);
+  rm('-f', path.join(libPath, fileName));
   await asyncExec(`wget -q --directory-prefix=${libPath} ${url}`);
 
-  if (!isBinaryExists() || !await validateBinary()) {
+  if (!isBinaryExists() || !(await validateBinary())) {
     throw new Error(`Downloaded binary checksum mismatch, cannot complete bootstrap`);
   }
 })();

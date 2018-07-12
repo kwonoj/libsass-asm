@@ -19,7 +19,7 @@
   },
   "lint-staged": {
     "*.{ts,js}": [
-      "prettier --write --single-quote --print-width 120 --jsx-bracket-same-line true --ignore-path ./src/lib/*.js",
+      "prettier --write --single-quote --print-width 120 --jsx-bracket-same-line true --ignore-path ./src/bin/*.js",
       "tslint --fix",
       "git add"
     ]
@@ -33,7 +33,7 @@
     "test": "echo not",
     "lint": "tslint -c tslint.json -p tsconfig.json \"src/**/*.ts\" \"spec/**/*.ts\"",
     "lint:staged": "lint-staged",
-    "build": "shx rm -rf ./dist && tsc && shx cp -r ./src/lib ./dist/src",
+    "build": "shx rm -rf ./dist && tsc && shx mkdir ./dist/src/bin && cp ./src/bin/*.js ./dist/src/bin/",
     "build:clean": "shx rm -rf ./dist",
     "commit": "git-cz -S",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"

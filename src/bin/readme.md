@@ -1,0 +1,1 @@
+Placeholder for libsass wasm binary. Do not manually modify structure / binary file downloaded via bootstrap.

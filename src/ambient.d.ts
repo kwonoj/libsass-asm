@@ -1,2 +1,2 @@
-declare module '*/lib/libsass';
+declare module '*/bin/libsass';
 declare module 'nanoid';

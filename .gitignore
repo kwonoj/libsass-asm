@@ -9,7 +9,7 @@ node_modules/
 typings/
 
 # Wasm binary
-src/lib/libsass.js
+src/bin/libsass.js
 
 # Generated
 dist/
