@@ -75,7 +75,11 @@ const buildDisplayVersion = async () => {
  *
  * @param sassOption
  */
-const buildSassOption = (context: ReturnType<typeof buildContext>, options: commandLineArgs.CommandLineOptions) => {
+const buildSassOption = (
+  context: ReturnType<typeof buildContext>,
+  options: commandLineArgs.CommandLineOptions,
+  outFile: string | undefined
+) => {
   const sassOption = context.options.create();
   //Set default values
   sassOption.outputStyle = OutputStyle.SASS_STYLE_NESTED;
@@ -84,6 +88,8 @@ const buildSassOption = (context: ReturnType<typeof buildContext>, options: comm
   Object.keys(options)
     .map(key => ({ key, value: options[key] }))
     .forEach(({ key, value }) => {
+      d(`Setting sass options for `, { key, value });
+
       switch (key) {
         case 'stdin':
           break;
@@ -104,7 +110,16 @@ const buildSassOption = (context: ReturnType<typeof buildContext>, options: comm
           sassOption.addPluginPath(value);
           break;
         case 'sourcemap':
-          break;
+          sassOption.sourceMapEmbed = value === 'inline' || (value === 'auto' && !outFile);
+          if (!!outFile && !sassOption.sourceMapEmbed) {
+            sassOption.sourceMapFile = `${outFile}.map`;
+          }
+          d(`Setting source map`, {
+            value,
+            outFile,
+            embed: sassOption.sourceMapEmbed,
+            mapFile: sassOption.sourceMapFile
+          });
         case 'omitMapComment':
           sassOption.omitMapComment = true;
           break;
@@ -136,12 +151,13 @@ const main = async () => {
 
   const { loadModule } = await import('./loadModule');
   const { context } = await loadModule();
-  const sassOption = buildSassOption(context, options);
-
   const files: Array<string> = options.files || [];
   if (files.length > 2) {
     throw new Error(`Unexpected arguments provided, '${files.slice(2)}'`);
   }
+
+  const [, outFile] = files;
+  const sassOption = buildSassOption(context, options, outFile);
 
   sassOption.dispose();
 };
