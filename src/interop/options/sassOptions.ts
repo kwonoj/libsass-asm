@@ -1,6 +1,6 @@
 import { mountDirectory, unmount } from 'emscripten-wasm-loader';
-import { log } from '../util/logger';
-import { wrapSassContext } from './wrapSassContext';
+import { log } from '../../util/logger';
+import { wrapSassContext } from '../wrapSassContext';
 import { wrapSassOptions } from './wrapSassOptions';
 
 interface SassOptionsInterface {

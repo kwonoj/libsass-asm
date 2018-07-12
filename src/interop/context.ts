@@ -2,9 +2,9 @@ import { mountDirectory, unmount } from 'emscripten-wasm-loader';
 import * as nanoid from 'nanoid';
 import { SassAsmModule } from '../SassAsmModule';
 import { log } from '../util/logger';
-import { SassOptions, SassOptionsInterface } from './sassOptions';
+import { SassOptions, SassOptionsInterface } from './options/sassOptions';
+import { wrapSassOptions } from './options/wrapSassOptions';
 import { wrapSassContext } from './wrapSassContext';
-import { wrapSassOptions } from './wrapSassOptions';
 
 /**
  * Create interop interface around context.

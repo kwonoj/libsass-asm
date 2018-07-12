@@ -135,8 +135,8 @@ const buildSassOption = (
   return sassOption;
 };
 
-const main = async () => {
-  const options = commandLineArgs(optionDefinitions, { camelCase: true });
+const main = async (argv: Array<string> = process.argv) => {
+  const options = commandLineArgs(optionDefinitions, { argv, camelCase: true });
   const displayHelp = options.help || Object.keys(options).length === 0;
   const displayVersion = options.version;
 
@@ -170,3 +170,5 @@ const main = async () => {
     process.exit(-1);
   }
 })();
+
+export { main };
