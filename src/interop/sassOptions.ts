@@ -30,6 +30,16 @@ interface SassOptionsInterface {
   omitMapComment: boolean;
 
   /**
+   * Property accessor to `sass_option_(get|set)_omit_source_map_embed`
+   */
+  sourceMapEmbed: boolean;
+
+  /**
+   * Property accessor to `sass_option_(get|set)_source_map_file`
+   */
+  sourceMapFile: string;
+
+  /**
    * Push include path for compilation.
    * @param {string} includePath path to be inlcluded
    */
@@ -86,7 +96,10 @@ class SassOptions implements SassOptionsInterface {
     private readonly cwrapOptions: ReturnType<typeof wrapSassOptions>,
     private readonly mount: ReturnType<typeof mountDirectory>,
     private readonly unmountPath: ReturnType<typeof unmount>,
-    private readonly allocString: (value: string) => number
+    private readonly strMethod: {
+      alloc: (value: string) => number;
+      ptrToString: (value: number) => string;
+    }
   ) {
     this.sassOptionsPtr = cwrapCtx.make_options();
     log(`SassOptions: created new instance`, { sassOptionsPtr: this.sassOptionsPtr });
@@ -130,18 +143,35 @@ class SassOptions implements SassOptionsInterface {
     this.cwrapOptions.option_set_omit_source_map_url(this.sassOptionsPtr, isOmitted);
   }
 
+  public get sourceMapEmbed(): boolean {
+    return !!this.cwrapOptions.option_get_source_map_embed(this.sassOptionsPtr);
+  }
+
+  public set sourceMapEmbed(embed: boolean) {
+    this.cwrapOptions.option_set_source_map_embed(this.sassOptionsPtr, embed);
+  }
+
+  public get sourceMapFile(): string {
+    const mapFilePtr = this.cwrapOptions.option_get_source_map_file(this.sassOptionsPtr);
+    return this.strMethod.ptrToString(mapFilePtr);
+  }
+
+  public set sourceMapFile(mapFile: string) {
+    this.cwrapOptions.option_set_source_map_file(this.sassOptionsPtr, this.strMethod.alloc(mapFile));
+  }
+
   public addIncludePath(includePath: string): void {
     const mounted = this.mount(includePath);
     this.mountedPath.push(mounted);
 
-    this.cwrapOptions.option_push_include_path(this.sassOptionsPtr, this.allocString(mounted));
+    this.cwrapOptions.option_push_include_path(this.sassOptionsPtr, this.strMethod.alloc(mounted));
   }
 
   public addPluginPath(pluginPath: string): void {
     const mounted = this.mount(pluginPath);
     this.mountedPath.push(mounted);
 
-    this.cwrapOptions.option_push_plugin_path(this.sassOptionsPtr, this.allocString(mounted));
+    this.cwrapOptions.option_push_plugin_path(this.sassOptionsPtr, this.strMethod.alloc(mounted));
   }
 
   public dispose(): void {

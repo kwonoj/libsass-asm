@@ -15,7 +15,11 @@ const wrapSassOptions = (cwrap: cwrapSignature) => ({
     'number'
   ]),
   //bool sass_option_get_source_map_embed (struct Sass_Options* options);
-  option_get_source_map_embed: null,
+  option_get_source_map_embed: cwrap<(sassOptionsPtr: number) => boolean>(
+    `sass_option_get_source_map_embed`,
+    'boolean',
+    ['number']
+  ),
   //bool sass_option_get_source_map_contents (struct Sass_Options* options);
   option_get_source_map_contents: null,
   //bool sass_option_get_source_map_file_urls (struct Sass_Options* options);
@@ -41,7 +45,9 @@ const wrapSassOptions = (cwrap: cwrapSignature) => ({
   //const char* sass_option_get_output_path (struct Sass_Options* options);
   option_get_output_path: null,
   //const char* sass_option_get_source_map_file (struct Sass_Options* options);
-  option_get_source_map_file: null,
+  option_get_source_map_file: cwrap<(sassOptionsPtr: number) => number>(`sass_option_get_source_map_file`, 'number', [
+    'number'
+  ]),
   //const char* sass_option_get_source_map_root (struct Sass_Options* options);
   option_get_source_map_root: null,
   //Sass_C_Function_List sass_option_get_c_functions (struct Sass_Options* options);
@@ -77,7 +83,11 @@ const wrapSassOptions = (cwrap: cwrapSignature) => ({
     ['number', 'boolean']
   ),
   //void sass_option_set_source_map_embed (struct Sass_Options* options, bool source_map_embed);
-  option_set_source_map_embed: null,
+  option_set_source_map_embed: cwrap<(sassOptionsPtr: number, embed: boolean) => void>(
+    `sass_option_set_source_map_embed`,
+    null,
+    ['number', 'boolean']
+  ),
   //void sass_option_set_source_map_contents (struct Sass_Options* options, bool source_map_contents);
   option_set_source_map_contents: null,
   //void sass_option_set_source_map_file_urls (struct Sass_Options* options, bool source_map_file_urls);
@@ -107,7 +117,11 @@ const wrapSassOptions = (cwrap: cwrapSignature) => ({
   //void sass_option_set_include_path (struct Sass_Options* options, const char* include_path);
   option_set_include_path: null,
   //void sass_option_set_source_map_file (struct Sass_Options* options, const char* source_map_file);
-  option_set_source_map_file: null,
+  option_set_source_map_file: cwrap<(sassOptionsPtr: number, mapFile: number) => void>(
+    `sass_option_set_source_map_file`,
+    null,
+    ['number', 'number']
+  ),
   //void sass_option_set_source_map_root (struct Sass_Options* options, const char* source_map_root);
   option_set_source_map_root: null,
   //void sass_option_set_c_functions (struct Sass_Options* options, Sass_C_Function_List c_functions);
