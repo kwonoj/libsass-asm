@@ -4,12 +4,12 @@ import * as commandLineArgs from 'command-line-args';
 import * as debug from 'debug';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as unixify from 'unixify';
 import * as util from 'util';
 import { OutputStyle } from './index';
 import { buildContext } from './interop/context';
 import { SassOptionsInterface } from './interop/options/sassOptions';
 import { SassContextInterface } from './interop/sassContext';
-import { SassFactory } from './SassFactory';
 import './verbose';
 
 const d = debug('libsass:cli');
@@ -40,6 +40,12 @@ const optionDefinitions = [
     type: String,
     multiple: true,
     defaultOption: true
+  },
+  {
+    name: 'mount',
+    description: 'Additional path to be mounted other than direct dir to input path',
+    type: String,
+    multiple: true
   }
 ];
 
@@ -84,7 +90,7 @@ const buildDisplayVersion = async () => {
 const buildSassOption = (
   context: ReturnType<typeof buildContext>,
   options: commandLineArgs.CommandLineOptions,
-  outFile: string | undefined
+  outFile?: string | null
 ) => {
   const sassOption = context.options.create();
   //Set default values
@@ -143,32 +149,34 @@ const buildSassOption = (
 
 const writeCompileResult = async (
   context: SassContextInterface,
-  outputPath: string | undefined,
-  sourceMapFile?: string | undefined
+  outputPath: string | null,
+  sourceMapFile?: string | null
 ) => {
   const { errorStatus, errorMessage, outputString, sourceMapString } = context;
 
+  if (errorStatus > 0) {
+    //To conform sass-spec's matcher, explicitly emit via stderr
+    process.stderr.write(errorMessage || `An error occurred; no error message available.\n`);
+    return 1;
+  }
+
   const write = async (outputPath: string, content: string) => {
-    if (errorStatus > 0) {
-      console.log(errorMessage || `An error occurred; no error message available.\n`);
-      return 1;
-    }
     try {
       d(`writeCompileResult: writing file`, { outputPath });
       await util.promisify(fs.writeFile)(outputPath, content, 'utf-8');
       return 0;
     } catch (e) {
-      console.log(`Failed to write output to ${outputPath}`, { e });
+      console.error(`Failed to write output to ${outputPath}`, { e });
       return 2;
     }
   };
 
-  if (!outputPath) {
+  if (!outputPath && !!outputString) {
     d(`writeCompileResult: path to output file not specified, print to stdout`);
     console.log(outputString);
   }
 
-  if (!sourceMapFile) {
+  if (!sourceMapFile && !!sourceMapString) {
     d(`writeCompileResult: path to source map file not specified, print to stdout`);
     console.log(sourceMapString);
   }
@@ -184,64 +192,50 @@ const writeCompileResult = async (
     return outputResult;
   }
 
-  return 0;
+  return errorStatus;
 };
 
-const compileStdin = async (factory: SassFactory, options: SassOptionsInterface, outputPath: string | undefined) => {
-  const { interop, context } = factory;
+const compileStdin = async (
+  context: ReturnType<typeof buildContext>,
+  options: SassOptionsInterface,
+  outputPath: { raw: string; mountedDir: string; mountedFullPath: string }
+) => {
   const stdin = await import('get-stdin');
   const input = await stdin();
-
-  const mountPath = !!outputPath ? interop.mount(path.dirname(outputPath)) : null;
 
   const dataContext = context.data.create(input);
   const sassContext = dataContext.getContext();
   dataContext.options = options;
 
   dataContext.compile();
-  const result = await writeCompileResult(sassContext, outputPath);
+  const result = await writeCompileResult(sassContext, !!outputPath ? outputPath.raw : null);
 
   dataContext.dispose();
-
-  if (!!mountPath) {
-    interop.unmount(mountPath);
-  }
 
   return result;
 };
 
 const compile = async (
-  factory: SassFactory,
+  context: ReturnType<typeof buildContext>,
   options: SassOptionsInterface,
-  inputPath: string,
-  outputPath: string | undefined
+  inputPath: { raw: string; mountedDir: string; mountedFullPath: string },
+  outputPath: { raw: string; mountedDir: string; mountedFullPath: string }
 ) => {
-  const { interop, context } = factory;
-  const mountedPath = [inputPath, outputPath]
-    .filter(x => !!x)
-    .map(p => path.dirname(p!))
-    .map(dir => {
-      d(`mount directory '${dir}'`);
-      return interop.mount(dir);
-    });
-
-  if (!!outputPath) {
-    options.outputPath = outputPath;
+  if (!!outputPath && !!outputPath.mountedFullPath) {
+    options.outputPath = outputPath.mountedFullPath;
   }
 
   const sourceMapFile = options.sourceMapFile;
-  options.inputPath = inputPath;
-  const fileContext = context.file.create(inputPath);
+  options.inputPath = inputPath.mountedFullPath;
+  const fileContext = context.file.create(inputPath.mountedFullPath);
   const sassContext = fileContext.getContext();
   fileContext.options = options;
   fileContext.compile();
 
-  const result = await writeCompileResult(sassContext, outputPath, sourceMapFile);
-
-  mountedPath.forEach(dir => {
-    interop.unmount(dir);
-    d(`unmount directory '${dir}'`);
-  });
+  //writeCompileResult's output path should be raw path instead of mounted virtual, it uses fs.write directly
+  const rawOutputPath = !!outputPath ? outputPath.raw : null;
+  const rawSourceMapPath = !!rawOutputPath && !!sourceMapFile ? `${rawOutputPath}.map` : null;
+  const result = await writeCompileResult(sassContext, rawOutputPath, rawSourceMapPath);
 
   fileContext.dispose();
 
@@ -263,19 +257,40 @@ const main = async (argv: Array<string> = process.argv) => {
   }
 
   const { loadModule } = await import('./loadModule');
-  const factory = await loadModule();
+  const { context, interop } = await loadModule();
   const files: Array<string> = options.files || [];
   if (files.length > 2) {
     throw new Error(`Unexpected arguments provided, '${files.slice(2)}'`);
   }
 
-  const [inputPath, outputPath] = files;
-  const sassOption = buildSassOption(factory.context, options, outputPath);
+  //Mount specified paths
+  const additionalMountPath = (Array.isArray(options.mount) ? options.mount : []).map(x => interop.mount(x));
+  const [mountedInput, mountedOutput] = files
+    .filter(x => !!x)
+    .map(p => ({ raw: p, dir: path.dirname(p!), file: path.basename(p!) }))
+    .map(({ raw, dir, file }) => {
+      const mountedDir = interop.mount(dir);
+      return {
+        raw,
+        mountedDir: mountedDir,
+        mountedFullPath: unixify(path.join(mountedDir, file)) as string
+      };
+    });
+
+  const sassOption = buildSassOption(context, options, !!mountedOutput ? mountedOutput.mountedFullPath : undefined);
+
   const result = options.stdin
-    ? await compileStdin(factory, sassOption, outputPath)
-    : await compile(factory, sassOption, inputPath, outputPath);
+    ? await compileStdin(context, sassOption, mountedOutput)
+    : await compile(context, sassOption, mountedInput, mountedOutput);
 
   sassOption.dispose();
+
+  additionalMountPath.forEach(x => interop.unmount(x));
+  [mountedInput, mountedOutput]
+    .filter(x => !!x)
+    .map(({ mountedDir }) => mountedDir)
+    .forEach(dir => interop.unmount(dir));
+
   process.exit(result);
 };
 
