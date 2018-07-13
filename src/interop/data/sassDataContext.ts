@@ -5,28 +5,28 @@ import { SassContext, SassContextInterface } from '../sassContext';
 import { SassSourceContext } from '../SassSourceContext';
 import { wrapSassContext } from '../wrapSassContext';
 
-/**
- * @internal
- */
-class SassFileContext implements SassSourceContext {
-  private readonly sassFileContextPtr: number;
+class SassDataContext implements SassSourceContext {
+  private readonly sassDataContextPtr: number;
   private sassOptions: SassOptionsInterface | null;
   private sassContext: SassContextInterface | null;
 
+  /**
+   *
+   */
   constructor(
-    inputPath: string,
+    input: string,
     private readonly cwrapCtx: ReturnType<typeof wrapSassContext>,
     private readonly strMethod: StringMethodInterface
   ) {
-    const inputPathPtr = this.strMethod.alloc(inputPath);
-    this.sassFileContextPtr = this.cwrapCtx.make_file_context(inputPathPtr);
-    log(`SassFileContext: created new instance`, { sassFileContextPtr: this.sassFileContextPtr });
+    const inputPtr = this.strMethod.alloc(input);
+    this.sassDataContextPtr = this.cwrapCtx.make_data_context(inputPtr);
+    log(`SassDataContext: created new instance`, { sassDataContextPtr: this.sassDataContextPtr });
   }
 
   //Instead of reconstructing js object from raw pointer,
   //returns reference of option instance already created.
   public get options(): SassOptionsInterface | null {
-    const sassOptionPtr = this.cwrapCtx.file_context_get_options(this.sassFileContextPtr);
+    const sassOptionPtr = this.cwrapCtx.data_context_get_options(this.sassDataContextPtr);
 
     //internal access to raw pointer - interface doesn't expose it.
     if (!!this.sassOptions && (this.sassOptions as SassOptions).sassOptionsPtr === sassOptionPtr) {
@@ -43,11 +43,11 @@ class SassFileContext implements SassSourceContext {
     this.sassOptions = option;
 
     //internal access to raw pointer - interface doesn't expose it.
-    this.cwrapCtx.file_context_set_options(this.sassFileContextPtr, (this.sassOptions as SassOptions).sassOptionsPtr);
+    this.cwrapCtx.data_context_set_options(this.sassDataContextPtr, (this.sassOptions as SassOptions).sassOptionsPtr);
   }
 
   public getContext(): SassContextInterface {
-    const sassContextPtr = this.cwrapCtx.file_context_get_context(this.sassFileContextPtr);
+    const sassContextPtr = this.cwrapCtx.data_context_get_context(this.sassDataContextPtr);
     if (!!this.sassContext && (this.sassContext as SassContext).sassContextPtr !== sassContextPtr) {
       throw new Error(`Unexpected: context has changed`);
     }
@@ -58,12 +58,12 @@ class SassFileContext implements SassSourceContext {
   }
 
   public compile(): number {
-    return this.cwrapCtx.compile_file_context(this.sassFileContextPtr);
+    return this.cwrapCtx.compile_data_context(this.sassDataContextPtr);
   }
 
   public dispose(): void {
-    this.cwrapCtx.delete_file_context(this.sassFileContextPtr);
+    this.cwrapCtx.delete_data_context(this.sassDataContextPtr);
   }
 }
 
-export { SassFileContext, SassSourceContext };
+export { SassDataContext };

@@ -7,8 +7,8 @@ import * as path from 'path';
 import * as util from 'util';
 import { OutputStyle } from './index';
 import { buildContext } from './interop/context';
-import { SassContextInterface } from './interop/file/sassContext';
 import { SassOptionsInterface } from './interop/options/sassOptions';
+import { SassContextInterface } from './interop/sassContext';
 import { SassFactory } from './SassFactory';
 import './verbose';
 
@@ -144,7 +144,7 @@ const buildSassOption = (
 const writeCompileResult = async (
   context: SassContextInterface,
   outputPath: string | undefined,
-  sourceMapFile: string | undefined
+  sourceMapFile?: string | undefined
 ) => {
   const { errorStatus, errorMessage, outputString, sourceMapString } = context;
 
@@ -154,30 +154,60 @@ const writeCompileResult = async (
       return 1;
     }
     try {
+      d(`writeCompileResult: writing file`, { outputPath });
       await util.promisify(fs.writeFile)(outputPath, content, 'utf-8');
-      console.log(content);
       return 0;
     } catch (e) {
-      console.log(`Filed to write output to ${outputPath}`, { e });
+      console.log(`Failed to write output to ${outputPath}`, { e });
       return 2;
     }
   };
 
+  if (!outputPath) {
+    d(`writeCompileResult: path to output file not specified, print to stdout`);
+    console.log(outputString);
+  }
+
+  if (!sourceMapFile) {
+    d(`writeCompileResult: path to source map file not specified, print to stdout`);
+    console.log(sourceMapString);
+  }
+
   if (outputPath) {
     const outputResult = await write(outputPath, outputString);
+    d(`writeCompileResult: wrote compilation result`, { outputResult });
     if (outputResult === 0 && sourceMapFile) {
-      return await write(sourceMapFile, sourceMapString);
+      const sourceMapResult = await write(sourceMapFile, sourceMapString);
+      d(`writeCompileResult: wrote source map result`, { sourceMapResult });
+      return sourceMapResult;
     }
     return outputResult;
   }
-  return 1;
+
+  return 0;
 };
 
-const compileStdin = async (..._args: Array<any>) => {
+const compileStdin = async (factory: SassFactory, options: SassOptionsInterface, outputPath: string | undefined) => {
+  const { interop, context } = factory;
   const stdin = await import('get-stdin');
-  await stdin();
+  const input = await stdin();
 
-  return -1;
+  const mountPath = !!outputPath ? interop.mount(path.dirname(outputPath)) : null;
+
+  const dataContext = context.data.create(input);
+  const sassContext = dataContext.getContext();
+  dataContext.options = options;
+
+  dataContext.compile();
+  const result = await writeCompileResult(sassContext, outputPath);
+
+  dataContext.dispose();
+
+  if (!!mountPath) {
+    interop.unmount(mountPath);
+  }
+
+  return result;
 };
 
 const compile = async (
