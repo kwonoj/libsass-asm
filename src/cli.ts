@@ -226,7 +226,10 @@ const compile = async (
 
   const sourceMapFile = options.sourceMapFile;
   options.inputPath = inputPath.mountedFullPath;
-  const fileContext = context.file.create(inputPath.mountedFullPath);
+
+  //TODO: do we need to supply mountedpath instead?
+  //(sass-spec fails on some test with mounted path, cause output expects physical path instead)
+  const fileContext = context.file.create(inputPath.raw);
   const sassContext = fileContext.getContext();
   fileContext.options = options;
   fileContext.compile();
@@ -252,7 +255,7 @@ const main = async (argv: Array<string> = process.argv) => {
     const usageDefinition = displayHelp ? helpDefinitions : await buildDisplayVersion();
     const usage = cmdUsage([...usageDefinition]);
     console.log(usage);
-    return;
+    return 0;
   }
 
   const { loadModule } = await import('./loadModule');
@@ -290,12 +293,12 @@ const main = async (argv: Array<string> = process.argv) => {
     .map(({ mountedDir }) => mountedDir)
     .forEach(dir => interop.unmount(dir));
 
-  process.exit(result);
+  return result;
 };
 
 (async () => {
   try {
-    await main();
+    process.exitCode = await main();
   } catch (error) {
     console.log(error);
     process.exit(-1);
