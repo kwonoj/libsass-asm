@@ -1,5 +1,7 @@
 import { SassAsmModule } from '../SassAsmModule';
 
+//https://github.com/sass/libsass/blob/master/docs/api-doc.md#miscellaneous-api-functions
+
 /**
  * Creates function to read versions of library.
  * @param asmModule
@@ -21,4 +23,14 @@ const getVersion = (asmModule: SassAsmModule) => async () => {
   return ret;
 };
 
-export { getVersion };
+const sassString = (_asmModule: SassAsmModule) => {
+  //char* sass_string_unquote (const char* str);
+  //char* sass_string_quote (const char* str, const char quote_mark);
+
+  return {
+    quote: null,
+    unquote: null
+  };
+};
+
+export { getVersion, sassString };

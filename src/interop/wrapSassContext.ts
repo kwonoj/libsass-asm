@@ -2,6 +2,8 @@ import { cwrapSignature } from 'emscripten-wasm-loader';
 
 /**
  * Creates cwrapped interface for context api.
+ *
+ * https://github.com/sass/libsass/blob/master/docs/api-context.md
  */
 const wrapSassContext = (cwrap: cwrapSignature) => ({
   //struct Sass_Options* sass_make_options (void);
