@@ -244,6 +244,27 @@ const compile = async (
   return result;
 };
 
+/**
+ * NOTE: What is this hack even?
+ * for sass-spec it validates output of message which includes input file's path, which libsass-asm
+ * doesn't uses but internally wires to virtual mounted path. This leads into test failure -
+ * for those in test runner, strip out mounted path to allow spec runner validates test output.
+ */
+const overrideStdErr = ({ mountedFullPath, raw }: { mountedFullPath: string; raw: string }) => {
+  if (!process.env.SASS_SPEC) {
+    return;
+  }
+
+  d(`overrideStdErr: specified as test runner, strip out mounted path from console output`);
+
+  const root = mountedFullPath.slice(0, mountedFullPath.indexOf(path.resolve(raw)));
+  const original = process.stderr.write.bind(process.stderr);
+  process.stderr.write = function(arg: string) {
+    const replaced = arg.replace(root, '');
+    return original(replaced);
+  };
+};
+
 const main = async (argv: Array<string> = process.argv) => {
   const options = commandLineArgs(optionDefinitions, { argv, camelCase: true });
   const displayHelp = options.help || Object.keys(options).length === 0;
@@ -278,6 +299,8 @@ const main = async (argv: Array<string> = process.argv) => {
         mountedFullPath: unixify(path.join(mountedDir, file)) as string
       };
     });
+
+  overrideStdErr(mountedInput);
 
   const sassOption = buildSassOption(context, options, !!mountedOutput ? mountedOutput.mountedFullPath : undefined);
 
