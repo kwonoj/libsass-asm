@@ -15,7 +15,7 @@
     "commitizen": {
       "path": "cz-conventional-changelog"
     },
-    "libsass-version": "3.5.4-180710"
+    "libsass-version": "3.5.4-180713"
   },
   "lint-staged": {
     "*.{ts,js}": [
@@ -61,7 +61,8 @@
     "emscripten-wasm-loader": "^2.1.1",
     "get-stdin": "^6.0.0",
     "source-map-support": "^0.5.6",
-    "tslib": "^1.9.3"
+    "tslib": "^1.9.3",
+    "unixify": "^1.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^7.0.0",
