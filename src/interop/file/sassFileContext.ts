@@ -1,33 +1,14 @@
 import { log } from '../../util/logger';
 import { StringMethodInterface } from '../interopUtility';
 import { SassOptions, SassOptionsInterface } from '../options/sassOptions';
+import { SassContext, SassContextInterface } from '../sassContext';
+import { SassSourceContext } from '../SassSourceContext';
 import { wrapSassContext } from '../wrapSassContext';
-import { SassContext, SassContextInterface } from './sassContext';
-
-interface SassFileContextInterface {
-  /**
-   * Property accessor to `file_context_(get|set)_options`
-   */
-  options: SassOptionsInterface | null;
-
-  /**
-   * Accessor to file_context_get_context
-   */
-  getContext(): SassContextInterface;
-
-  compile(): void;
-
-  /**
-   * Release allocated memory with created instance.
-   * Accessor to sass_delete_file_context
-   */
-  dispose(): void;
-}
 
 /**
  * @internal
  */
-class SassFileContext implements SassFileContextInterface {
+class SassFileContext implements SassSourceContext {
   private readonly sassFileContextPtr: number;
   private sassOptions: SassOptionsInterface | null;
   private sassContext: SassContextInterface | null;
@@ -85,4 +66,4 @@ class SassFileContext implements SassFileContextInterface {
   }
 }
 
-export { SassFileContext, SassFileContextInterface };
+export { SassFileContext, SassSourceContext };

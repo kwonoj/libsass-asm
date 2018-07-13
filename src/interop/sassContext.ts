@@ -1,5 +1,5 @@
-import { StringMethodInterface } from '../interopUtility';
-import { wrapSassContext } from '../wrapSassContext';
+import { StringMethodInterface } from './interopUtility';
+import { wrapSassContext } from './wrapSassContext';
 
 /**
  * struct Sass_Context
