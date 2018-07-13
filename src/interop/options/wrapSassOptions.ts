@@ -2,6 +2,8 @@ import { cwrapSignature } from 'emscripten-wasm-loader';
 
 /**
  * Creates cwrapped interface for options api.
+ *
+ * https://github.com/sass/libsass/blob/master/docs/api-context.md#sass-options-api
  */
 const wrapSassOptions = (cwrap: cwrapSignature) => ({
   //int sass_option_get_precision (struct Sass_Options* options);
