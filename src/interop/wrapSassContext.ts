@@ -10,14 +10,16 @@ const wrapSassContext = (cwrap: cwrapSignature) => ({
   //struct Sass_File_Context* sass_make_file_context (const char* input_path);
   make_file_context: cwrap<(inputPath: number) => number>(`sass_make_file_context`, 'number', ['number']),
   //struct Sass_Data_Context* sass_make_data_context (char* source_string);
-  make_data_context: null,
+  make_data_context: cwrap<(inputPath: number) => number>(`sass_make_data_context`, 'number', ['number']),
 
   //int sass_compile_file_context (struct Sass_File_Context* ctx);
   compile_file_context: cwrap<(sassFileContextptr: number) => number>(`sass_compile_file_context`, 'number', [
     'number'
   ]),
   //int sass_compile_data_context (struct Sass_Data_Context* ctx);
-  compile_data_context: null,
+  compile_data_context: cwrap<(sassFileContextptr: number) => number>(`sass_compile_data_context`, 'number', [
+    'number'
+  ]),
 
   //struct Sass_Compiler* sass_make_file_compiler (struct Sass_File_Context* file_ctx);
   make_file_compiler: null,
@@ -37,14 +39,16 @@ const wrapSassContext = (cwrap: cwrapSignature) => ({
   //void sass_delete_file_context (struct Sass_File_Context* ctx);
   delete_file_context: cwrap<(sassFileContextptr: number) => void>(`sass_delete_file_context`, null, ['number']),
   //void sass_delete_data_context (struct Sass_Data_Context* ctx);
-  delete_data_context: null,
+  delete_data_context: cwrap<(sassFileContextptr: number) => void>(`sass_delete_data_context`, null, ['number']),
 
   //struct Sass_Context* sass_file_context_get_context (struct Sass_File_Context* file_ctx);
   file_context_get_context: cwrap<(sassFileCtxPtr: number) => number>(`sass_file_context_get_context`, 'number', [
     'number'
   ]),
   //struct Sass_Context* sass_data_context_get_context (struct Sass_Data_Context* data_ctx);
-  data_context_get_context: null,
+  data_context_get_context: cwrap<(sassFileCtxPtr: number) => number>(`sass_data_context_get_context`, 'number', [
+    'number'
+  ]),
 
   //struct Sass_Options* sass_context_get_options (struct Sass_Context* ctx);
   context_get_options: null,
@@ -53,7 +57,9 @@ const wrapSassContext = (cwrap: cwrapSignature) => ({
     'number'
   ]),
   //struct Sass_Options* sass_data_context_get_options (struct Sass_Data_Context* data_ctx);
-  data_context_get_options: null,
+  data_context_get_options: cwrap<(sassFileCtxPtr: number) => number>(`sass_data_context_get_options`, 'number', [
+    'number'
+  ]),
   //void sass_file_context_set_options (struct Sass_File_Context* file_ctx, struct Sass_Options* opt);
   file_context_set_options: cwrap<(sassFileCtxPtr: number, sassOptionsPtr: number) => void>(
     `sass_file_context_set_options`,
@@ -61,7 +67,11 @@ const wrapSassContext = (cwrap: cwrapSignature) => ({
     ['number', 'number']
   ),
   //void sass_data_context_set_options (struct Sass_Data_Context* data_ctx, struct Sass_Options* opt);
-  data_context_set_options: null,
+  data_context_set_options: cwrap<(sassFileCtxPtr: number, sassOptionsPtr: number) => void>(
+    `sass_data_context_set_options`,
+    null,
+    ['number', 'number']
+  ),
 
   //const char* sass_context_get_output_string (struct Sass_Context* ctx);
   context_get_output_string: cwrap<(sassContextPtr: number) => number>(`sass_context_get_output_string`, 'number', [

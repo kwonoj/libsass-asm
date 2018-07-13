@@ -55,7 +55,9 @@ const wrapSassOptions = (cwrap: cwrapSignature) => ({
   //Sass_C_Function_List sass_option_get_c_functions (struct Sass_Options* options);
   option_get_c_functions: null,
   //Sass_C_Import_Callback sass_option_get_importer (struct Sass_Options* options);
-  option_get_importer: null,
+  option_get_importer: () => {
+    throw new Error('not implemented');
+  },
 
   //size_t sass_option_get_include_path_size(struct Sass_Options* options);
   option_get_include_path_size: null,
@@ -63,9 +65,13 @@ const wrapSassOptions = (cwrap: cwrapSignature) => ({
   option_get_include_path: null,
 
   //size_t sass_option_get_plugin_path_size(struct Sass_Options* options);
-  option_get_plugin_path_size: null,
+  option_get_plugin_path_size: () => {
+    throw new Error('not implemented');
+  },
   //const char* sass_option_get_plugin_path(struct Sass_Options* options, size_t i);
-  option_get_plugin_path: null,
+  option_get_plugin_path: () => {
+    throw new Error('not implemented');
+  },
 
   //void sass_option_set_precision (struct Sass_Options* options, int precision);
   option_set_precision: cwrap<(sassOptionsPtr: number, precision: number) => void>(`sass_option_set_precision`, null, [
@@ -136,7 +142,9 @@ const wrapSassOptions = (cwrap: cwrapSignature) => ({
   //void sass_option_set_c_functions (struct Sass_Options* options, Sass_C_Function_List c_functions);
   option_set_c_functions: null,
   //void sass_option_set_importer (struct Sass_Options* options, Sass_C_Import_Callback importer);
-  option_set_importer: null,
+  option_set_importer: () => {
+    throw new Error('not implemented');
+  },
 
   //void sass_option_push_plugin_path (struct Sass_Options* options, const char* path);
   option_push_plugin_path: cwrap<(sassOptionsPtr: number, path: number) => void>(`sass_option_push_plugin_path`, null, [
