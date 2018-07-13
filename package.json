@@ -9,7 +9,7 @@
     "node": ">=8.0.0"
   },
   "bin": {
-    "sass": "dist/src/cli.js"
+    "sass": "dist/cli.bundle.js"
   },
   "config": {
     "commitizen": {
@@ -33,8 +33,11 @@
     "test": "echo not",
     "lint": "tslint -c tslint.json -p tsconfig.json \"src/**/*.ts\" \"spec/**/*.ts\"",
     "lint:staged": "lint-staged",
-    "build": "shx rm -rf ./dist && tsc && shx mkdir ./dist/src/bin && cp ./src/bin/*.js ./dist/src/bin/",
+    "build": "npm-run-all build:*",
     "build:clean": "shx rm -rf ./dist",
+    "build:tsc": "tsc",
+    "build:webpack": "webpack --require ts-node/register",
+    "build:asset": "shx mkdir ./dist/src/bin && cp ./src/bin/*.js ./dist/src/bin/",
     "commit": "git-cz -S",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"
   },
@@ -76,6 +79,8 @@
     "@types/node": "^10.5.2",
     "@types/shelljs": "^0.8.0",
     "@types/source-map-support": "^0.4.1",
+    "@types/uglifyjs-webpack-plugin": "^1.1.0",
+    "@types/webpack": "^4.4.5",
     "chai": "^4.1.2",
     "commitizen": "^2.10.1",
     "conventional-changelog-cli": "^2.0.1",
@@ -88,9 +93,13 @@
     "shelljs": "^0.8.2",
     "shx": "^0.3.1",
     "ts-jest": "^23.0.0",
+    "ts-loader": "^4.4.2",
     "ts-node": "^7.0.0",
     "tslint": "^5.10.0",
     "tslint-no-unused-expression-chai": "^0.1.3",
-    "typescript": "^2.9.2"
+    "typescript": "^2.9.2",
+    "uglifyjs-webpack-plugin": "^1.2.7",
+    "webpack": "^4.16.0",
+    "webpack-command": "^0.4.1"
   }
 }
