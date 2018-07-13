@@ -1,4 +1,5 @@
-import { SassFileContext, SassFileContextInterface } from './file/sassFileContext';
+import { SassDataContext } from './data/sassDataContext';
+import { SassFileContext, SassSourceContext } from './file/sassFileContext';
 import { buildInteropUtility } from './interopUtility';
 import { SassOptions, SassOptionsInterface } from './options/sassOptions';
 import { wrapSassOptions } from './options/wrapSassOptions';
@@ -22,7 +23,10 @@ const buildContext = (
       create: () => new SassOptions(cwrapContext, cwrapOptions, mount, unmount, str) as SassOptionsInterface
     },
     file: {
-      create: (inputPath: string) => new SassFileContext(inputPath, cwrapContext, str) as SassFileContextInterface
+      create: (inputPath: string) => new SassFileContext(inputPath, cwrapContext, str) as SassSourceContext
+    },
+    data: {
+      create: (input: string) => new SassDataContext(input, cwrapContext, str) as SassSourceContext
     }
   };
 };
