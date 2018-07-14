@@ -47,6 +47,7 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Run sass-spec suite
           command: |
             # due to node.js process startup time, running full sass-spec takes quite long time.
             # only do on tagged release.
