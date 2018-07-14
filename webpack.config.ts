@@ -5,6 +5,7 @@ import * as webpack from 'webpack';
 module.exports = {
   mode: 'production',
   entry: './src/cli.ts',
+  devtool: 'source-map',
 
   output: {
     path: path.resolve(__dirname, 'dist'),
