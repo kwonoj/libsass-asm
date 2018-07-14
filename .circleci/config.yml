@@ -7,11 +7,12 @@ jobs:
     working_directory: ~/node8
     steps:
       - checkout
-      - run: npm install
-      - run: npm run build
       - run:
-          name: Run tests
-          command: node ./dist/src/cli.js
+          command: |
+            npm install
+            npm run build
+            node ./dist/cli.bundle.js -v
+            node ./dist/src/cli.js -v
 
   "node-9":
     docker:
@@ -19,11 +20,12 @@ jobs:
     working_directory: ~/node9
     steps:
       - checkout
-      - run: npm install
-      - run: npm run build
       - run:
-          name: Run tests
-          command: node ./dist/src/cli.js
+          command: |
+            npm install
+            npm run build
+            node ./dist/cli.bundle.js -v
+            node ./dist/src/cli.js -v
 
   "node-10":
     docker:
@@ -31,11 +33,45 @@ jobs:
     working_directory: ~/node10
     steps:
       - checkout
-      - run: npm install
-      - run: npm run build
       - run:
-          name: Run tests
-          command: node ./dist/src/cli.js
+          command: |
+            npm install
+            npm run build
+            node ./dist/cli.bundle.js -v
+            node ./dist/src/cli.js -v
+
+    "sass-spec":
+      docker:
+      - image: circleci/node:9-browsers
+      working_directory: ~/node9
+      steps:
+        - checkout
+        - run:
+          command: |
+            # due to node.js process startup time, running full sass-spec takes quite long time.
+            # only do on tagged release.
+            npm install
+            npm run build
+
+            sudo apt-get install ruby-full
+            sudo gem install bundler
+
+            # Setting up sass-spec
+            git clone https://github.com/sass/sass-spec
+            pushd sass-spec
+            git config user.name "OJ Kwon" && git config user.email "kwon.ohjoong@gmail.com"
+
+            # TODO: verify correct way to run sass-spec against matching version
+            git checkout v3.5.4
+            git cherry-pick 106e6d4c2e35bda22238539e978acdd60e153fb9
+
+            # TODO: why --probe-todo doesn't work?
+            # The following tests pass but were marked as TODO for libsass: (i.e https://travis-ci.org/sass/libsass/jobs/399963285)
+            rm -rf spec/libsass-closed-issues/issue_2360
+            rm -rf spec/sass/import/unquoted
+            popd
+
+            ruby ./sass-spec/sass-spec.rb -V 3.5 -c 'SASS_SPEC=true node ./dist/cli.bundle.js --root ./sass-spec' --impl libsass --probe-todo -s sass-spec/spec
 
 workflows:
   version: 2
@@ -44,3 +80,9 @@ workflows:
       - "node-8"
       - "node-9"
       - "node-10"
+      - "sass-spec":
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
