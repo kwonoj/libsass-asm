@@ -9,7 +9,6 @@ import { OutputStyle } from './index';
 import { buildContext } from './interop/context';
 import { SassOptionsInterface } from './interop/options/sassOptions';
 import { SassContextInterface } from './interop/sassContext';
-import './verbose';
 
 const d = debug('libsass:cli');
 const styleOptions = ['nested', 'expanded', 'compact', 'compressed'];

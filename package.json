@@ -65,7 +65,8 @@
     "get-stdin": "^6.0.0",
     "source-map-support": "^0.5.6",
     "tslib": "^1.9.3",
-    "unixify": "^1.0.0"
+    "unixify": "^1.0.0",
+    "v8-compile-cache": "^2.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^7.0.0",
