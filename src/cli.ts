@@ -41,8 +41,8 @@ const optionDefinitions = [
     defaultOption: true
   },
   {
-    name: 'mount',
-    description: 'Additional path to be mounted other than direct dir to input path',
+    name: 'root',
+    description: 'Top level path where sass inputs are located if there are import paths exist other than input path.',
     type: String,
     multiple: true
   }
@@ -287,7 +287,7 @@ const main = async (argv: Array<string> = process.argv) => {
   }
 
   //Mount specified paths
-  const additionalMountPath = (Array.isArray(options.mount) ? options.mount : []).map(x => interop.mount(x));
+  const additionalMountPath = (Array.isArray(options.root) ? options.root : []).map(x => interop.mount(x));
   const [mountedInput, mountedOutput] = files
     .filter(x => !!x)
     .map(p => ({ raw: p, dir: path.dirname(p!), file: path.basename(p!) }))
