@@ -70,6 +70,8 @@ jobs:
             # The following tests pass but were marked as TODO for libsass: (i.e https://travis-ci.org/sass/libsass/jobs/399963285)
             rm -rf spec/libsass-closed-issues/issue_2360
             rm -rf spec/sass/import/unquoted
+
+            bundle install
             popd
 
             ruby ./sass-spec/sass-spec.rb -V 3.5 -c 'SASS_SPEC=true node ./dist/cli.bundle.js --root ./sass-spec' --impl libsass --probe-todo -s sass-spec/spec
