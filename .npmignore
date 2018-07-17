@@ -20,3 +20,8 @@ wallaby.js
 dist/src/lib/README.md
 commitlint.config.js
 tsconfig.json
+webpack.*.ts
+CHANGELOG.md
+bootstrap.ts
+.circleci/
+libsass-asm-*.tgz
