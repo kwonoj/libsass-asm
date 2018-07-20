@@ -8,10 +8,11 @@ import { cwrapSignature } from 'emscripten-wasm-loader';
 //TODO: verify return type / param type of cwrapped signature for Sass_Import_Entry
 const wrapSassImporter = (cwrap: cwrapSignature) => ({
   //Sass_Importer_Entry sass_make_importer (Sass_Importer_Fn importer, double priority, void* cookie);
-  make_importer: cwrap<(importFnPtr: number, cookie: number) => number>(`sass_make_importer`, 'number', [
+  make_importer: cwrap<(importFnPtr: number, priority: number, cookie: number) => number>(
+    `sass_make_importer`,
     'number',
-    'number'
-  ]),
+    ['number', 'number', 'number']
+  ),
   //Sass_C_Import_Fn sass_importer_get_function (Sass_C_Import_Callback fn);
   importer_get_function: cwrap<(importCallbackPtr: number) => number>(`sass_importer_get_function`, 'number', [
     'number'
