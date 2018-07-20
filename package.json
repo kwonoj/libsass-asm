@@ -38,6 +38,7 @@
     "build:tsc": "tsc",
     "build:webpack": "webpack --require ts-node/register",
     "build:asset": "shx mkdir ./dist/src/bin && cp ./src/bin/*.js ./dist/src/bin/",
+    "dev:cli": "tsc && node ./dist/src/verbose",
     "commit": "git-cz -S",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"
   },
