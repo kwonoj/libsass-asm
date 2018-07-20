@@ -24,7 +24,7 @@ export const sassLoader = (asmModule: SassAsmModule): SassFactory => {
 
   return {
     getVersion: getVersion(asmModule),
-    context: buildContext(cwrapCtx, cwrapOptions, interop),
+    context: buildContext(cwrapCtx, cwrapOptions, cwrapImporter, interop),
     importer: buildImporter(cwrapImporter, interop),
     interop,
     raw: {

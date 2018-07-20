@@ -55,9 +55,11 @@ const wrapSassOptions = (cwrap: cwrapSignature) => ({
   //const char* sass_option_get_source_map_root (struct Sass_Options* options);
   option_get_source_map_root: null,
   //Sass_Importer_List sass_option_get_c_headers (struct Sass_Options* options);
-  sass_option_get_c_headers: null,
+  option_get_c_headers: null,
   //Sass_Importer_List sass_option_get_c_importers (struct Sass_Options* options);
-  sass_option_get_c_importers: null,
+  option_get_c_importers: cwrap<(sassOptionsPtr: number) => number>(`sass_option_get_c_importers`, 'number', [
+    'number'
+  ]),
   //Sass_Function_List sass_option_get_c_functions (struct Sass_Options* options);
   option_get_c_functions: null,
 
@@ -144,7 +146,11 @@ const wrapSassOptions = (cwrap: cwrapSignature) => ({
   //void sass_option_set_c_headers (struct Sass_Options* options, Sass_Importer_List c_headers);
   option_set_c_headers: null,
   //void sass_option_set_c_importers (struct Sass_Options* options, Sass_Importer_List c_importers);
-  option_set_c_importers: null,
+  option_set_c_importers: cwrap<(sassOptionsPtr: number, importersList: number) => void>(
+    `sass_option_set_c_importers`,
+    null,
+    ['number', 'number']
+  ),
   //void sass_option_set_c_functions (struct Sass_Options* options, Sass_Function_List c_functions);
   option_set_c_functions: null,
 
