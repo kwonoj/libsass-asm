@@ -1,4 +1,6 @@
 import { buildContext } from './interop/context';
+import { buildImporter } from './interop/importer';
+import { wrapSassImporter } from './interop/importer/wrapSassImporter';
 import { buildInteropUtility } from './interop/interopUtility';
 import { getVersion } from './interop/miscellaneous';
 import { wrapSassOptions } from './interop/options/wrapSassOptions';
@@ -14,9 +16,13 @@ interface SassFactory {
    */
   getVersion: ReturnType<typeof getVersion>;
   /**
-   * creation method to context api
+   * Creation method to context api
    */
   context: ReturnType<typeof buildContext>;
+  /**
+   * Create method to importer api
+   */
+  importer: ReturnType<typeof buildImporter>;
   /**
    * utility functions to interop raw libsass interface
    */
@@ -27,6 +33,7 @@ interface SassFactory {
   raw: {
     context: ReturnType<typeof wrapSassContext>;
     options: ReturnType<typeof wrapSassOptions>;
+    importer: ReturnType<typeof wrapSassImporter>;
   };
 }
 

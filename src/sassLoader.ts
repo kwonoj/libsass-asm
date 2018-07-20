@@ -1,4 +1,6 @@
 import { buildContext } from './interop/context';
+import { buildImporter } from './interop/importer';
+import { wrapSassImporter } from './interop/importer/wrapSassImporter';
 import { buildInteropUtility } from './interop/interopUtility';
 import { getVersion } from './interop/miscellaneous';
 import { wrapSassOptions } from './interop/options/wrapSassOptions';
@@ -16,15 +18,19 @@ export const sassLoader = (asmModule: SassAsmModule): SassFactory => {
   const { cwrap } = asmModule;
   const cwrapCtx = wrapSassContext(cwrap);
   const cwrapOptions = wrapSassOptions(cwrap);
+  const cwrapImporter = wrapSassImporter(cwrap);
+
   const interop = buildInteropUtility(asmModule);
 
   return {
     getVersion: getVersion(asmModule),
     context: buildContext(cwrapCtx, cwrapOptions, interop),
+    importer: buildImporter(cwrapImporter, interop),
     interop,
     raw: {
       context: cwrapCtx,
-      options: cwrapOptions
+      options: cwrapOptions,
+      importer: cwrapImporter
     }
   };
 };
