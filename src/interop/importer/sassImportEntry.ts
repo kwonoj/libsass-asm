@@ -42,7 +42,7 @@ class SassImportEntry implements SassImportEntryInterface {
    * Raw pointer to `struct Sass_Import_Entry*`
    * @internal
    */
-  private readonly sassImportEntryPtr: number;
+  public readonly sassImportEntryPtr: number;
   constructor(
     private readonly cwrapImporter: ReturnType<typeof wrapSassImporter>,
     private readonly strMethod: StringMethodInterface,
