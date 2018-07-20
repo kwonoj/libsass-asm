@@ -1,4 +1,5 @@
 import { buildContext } from './interop/context';
+import { getFnPtrHandler } from './interop/fnPtrHandler';
 import { buildImporter } from './interop/importer';
 import { wrapSassImporter } from './interop/importer/wrapSassImporter';
 import { buildInteropUtility } from './interop/interopUtility';
@@ -21,11 +22,12 @@ export const sassLoader = (asmModule: SassAsmModule): SassFactory => {
   const cwrapImporter = wrapSassImporter(cwrap);
 
   const interop = buildInteropUtility(asmModule);
+  const fnPtrHandler = getFnPtrHandler(asmModule);
 
   return {
     getVersion: getVersion(asmModule),
     context: buildContext(cwrapCtx, cwrapOptions, cwrapImporter, interop),
-    importer: buildImporter(cwrapImporter, interop),
+    importer: buildImporter(cwrapImporter, interop, fnPtrHandler),
     interop,
     raw: {
       context: cwrapCtx,

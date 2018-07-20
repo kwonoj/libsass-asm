@@ -1,6 +1,13 @@
 import { log } from '../../util/logger';
+import { getFnPtrHandler } from '../fnPtrHandler';
 import { StringMethodInterface } from '../interopUtility';
 import { wrapSassImporter } from './wrapSassImporter';
+
+type importCallbackType = (
+  path: string,
+  importEntry: SassImportEntryInterface,
+  compiler: any
+) => Array<SassImportEntryInterface>;
 
 /**
  * Interop interface to `Sass_Import_Entry`
@@ -42,15 +49,33 @@ class SassImportEntry implements SassImportEntryInterface {
    * Raw pointer to `struct Sass_Import_Entry*`
    * @internal
    */
-  public readonly sassImportEntryPtr: number;
+  public sassImportEntryPtr: number;
+  /**
+   * Hold pointer to function added via `addFunction`, to be removed when disposing entry instance.
+   */
+  private callbackPtr: number;
+
   constructor(
     private readonly cwrapImporter: ReturnType<typeof wrapSassImporter>,
     private readonly strMethod: StringMethodInterface,
-    rel: string,
-    abs: string,
-    source: string,
-    sourceMap: string
-  ) {
+    private readonly fnPtrHandler: ReturnType<typeof getFnPtrHandler>
+  ) {}
+
+  public makeImport(_importCallback: importCallbackType): void {
+    function boo(_path: number, _cb: number, _comp: number) {
+      //noop
+    }
+    this.callbackPtr = this.fnPtrHandler.add(boo);
+    this.sassImportEntryPtr = this.cwrapImporter.make_importer(
+      this.callbackPtr,
+      0,
+      0 /* TODO: need way to pass cookie */
+    );
+
+    log(`SassImportEntry: created new instance`, { sassImportEntryPtr: this.sassImportEntryPtr });
+  }
+
+  public makeImporter(rel: string, abs: string, source: string, sourceMap: string): void {
     //make_import_entry internally just calls make_import
     this.sassImportEntryPtr = this.cwrapImporter.make_import(
       this.strMethod.alloc(rel),
@@ -58,7 +83,7 @@ class SassImportEntry implements SassImportEntryInterface {
       this.strMethod.alloc(source),
       this.strMethod.alloc(sourceMap)
     );
-    log(`SassImportEntry: created new instance`, { sassOptionsPtr: this.sassImportEntryPtr });
+    log(`SassImportEntry: created new instance`, { sassImportEntryPtr: this.sassImportEntryPtr });
   }
 
   public get error(): { message: string; line: number; column: number } {
@@ -100,7 +125,8 @@ class SassImportEntry implements SassImportEntryInterface {
 
   public dispose(): void {
     this.cwrapImporter.delete_import(this.sassImportEntryPtr);
+    this.fnPtrHandler.remove(this.callbackPtr);
   }
 }
 
-export { SassImportEntryInterface, SassImportEntry };
+export { SassImportEntryInterface, SassImportEntry, importCallbackType };

@@ -10,6 +10,8 @@ interface SassAsmModule extends Required<BaseAsmModule> {
   _libsass_version: () => number;
   _libsass_language_version: () => number;
   _sass2scss_version: () => number;
+  addFunction: (fn: Function) => number;
+  removeFunction: (fnPtr: number) => void;
 }
 
 export { SassAsmModule };
