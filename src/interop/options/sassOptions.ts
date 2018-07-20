@@ -1,5 +1,8 @@
 import { mountDirectory, unmount } from 'emscripten-wasm-loader';
 import { log } from '../../util/logger';
+import { SassImportEntryInterface } from '../importer/sassImportEntry';
+import { SassImportEntryList } from '../importer/sassImportEntryList';
+import { wrapSassImporter } from '../importer/wrapSassImporter';
 import { StringMethodInterface } from '../interopUtility';
 import { wrapSassContext } from '../wrapSassContext';
 import { wrapSassOptions } from './wrapSassOptions';
@@ -54,6 +57,11 @@ interface SassOptionsInterface {
   inputPath: string;
 
   /**
+   * Property accessor to `sass_option_(get|set)_c_importers`
+   */
+  importers: Array<SassImportEntryInterface>;
+
+  /**
    * Push include path for compilation.
    * Accessor to sass_option_push_include_path
    *
@@ -100,6 +108,11 @@ class SassOptions implements SassOptionsInterface {
    * List of virtual mounted path.
    */
   private readonly mountedPath: Array<string> = [];
+
+  /**
+   * List of importers.
+   */
+  private importersList: SassImportEntryList | null;
   /**
    * Construct new instance of SassOptions.
    *
@@ -112,6 +125,7 @@ class SassOptions implements SassOptionsInterface {
   constructor(
     private readonly cwrapCtx: ReturnType<typeof wrapSassContext>,
     private readonly cwrapOptions: ReturnType<typeof wrapSassOptions>,
+    private readonly cwrapImporter: ReturnType<typeof wrapSassImporter>,
     private readonly mount: ReturnType<typeof mountDirectory>,
     private readonly unmountPath: ReturnType<typeof unmount>,
     private readonly strMethod: StringMethodInterface
@@ -191,6 +205,17 @@ class SassOptions implements SassOptionsInterface {
 
   public set inputPath(outPath: string) {
     this.cwrapOptions.option_set_input_path(this.sassOptionsPtr, this.strMethod.alloc(outPath));
+  }
+
+  public get importers(): Array<SassImportEntryInterface> {
+    return !!this.importersList ? this.importersList.entry : [];
+  }
+
+  public set importers(values: Array<SassImportEntryInterface>) {
+    this.importersList = new SassImportEntryList(this.cwrapImporter, values.length);
+    this.importersList.entry = values;
+
+    this.cwrapOptions.option_set_c_importers(this.sassOptionsPtr, this.importersList.sassImportEntryListPtr);
   }
 
   public addIncludePath(includePath: string): void {
