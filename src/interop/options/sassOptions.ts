@@ -4,6 +4,10 @@ import { StringMethodInterface } from '../interopUtility';
 import { wrapSassContext } from '../wrapSassContext';
 import { wrapSassOptions } from './wrapSassOptions';
 
+/**
+ * Interop interface to `sass_option*` api
+ * (https://github.com/sass/libsass/blob/master/docs/api-context.md#sass-options-api)
+ */
 interface SassOptionsInterface {
   /**
    * Property accessor to `sass_option_(get|set)_precision`
@@ -83,9 +87,6 @@ enum OutputStyle {
 
 /**
  * @internal
- *
- * Interop interface to `sass_option*` api
- * (https://github.com/sass/libsass/blob/master/docs/api-context.md#sass-options-api)
  *
  */
 class SassOptions implements SassOptionsInterface {
