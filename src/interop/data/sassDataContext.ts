@@ -27,18 +27,24 @@ class SassDataContext implements SassSourceContext {
   //returns reference of option instance already created.
   public get options(): SassOptionsInterface | null {
     const sassOptionPtr = this.cwrapCtx.data_context_get_options(this.sassDataContextPtr);
-
     //internal access to raw pointer - interface doesn't expose it.
+    const containedOptionPtr = (this.sassOptions as SassOptions).sassOptionsPtr;
+    log(`SassDataContext: get option pointer from context`, { sassOptionPtr, containedOptionPtr });
+
     if (!!this.sassOptions && (this.sassOptions as SassOptions).sassOptionsPtr === sassOptionPtr) {
       return this.sassOptions;
     }
-    throw new Error(`Cannot get option`);
+    log(`SassDataContext: pointer mismatch between datacontext to contained value, returning empty`);
+    return null;
   }
 
   public set options(option: SassOptionsInterface | null) {
     if (!option) {
-      throw new Error('Cannot set empty options');
+      log(`SassDataContext: cannot set null value as option`);
+      return;
     }
+
+    //Hold reference to SassOptionsInterface to access struct values in JS context
     this.sassOptions = null;
     this.sassOptions = option;
 
