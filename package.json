@@ -15,7 +15,7 @@
     "commitizen": {
       "path": "cz-conventional-changelog"
     },
-    "libsass-version": "3.5.4-180713"
+    "libsass-version": "3.5.4-180720"
   },
   "lint-staged": {
     "*.{ts,js}": [
