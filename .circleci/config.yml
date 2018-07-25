@@ -80,12 +80,4 @@ workflows:
   version: 2
   build:
     jobs:
-      - "node-8"
-      - "node-9"
-      - "node-10"
-      - sassspec:
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /.*/
+      - sassspec
