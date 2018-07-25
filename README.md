@@ -1,6 +1,6 @@
 [![CircleCI](https://circleci.com/gh/kwonoj/libsass-asm/tree/master.svg?style=svg)](https://circleci.com/gh/kwonoj/libsass-asm/tree/master)
 [![npm](https://badgen.now.sh/npm/v/libsass-asm)](https://badgen.now.sh/npm/v/libsass-asm)
-[![node](https://badgen.now.sh/badge/node/%3E%3D8.0)](https://www.npmjs.com/package/hunspell-asm)
+[![node](https://badgen.now.sh/badge/node/%3E%3D8.0)](https://www.npmjs.com/package/libsass-asm)
 
 # libsass-asm
 
@@ -21,10 +21,10 @@ npm install libsass-asm
 # Usage
 
 ## Using libsass interface
-`libsass-asm` relies on wasm binary of hunspell, which need to be initialized first.
+`libsass-asm` relies on wasm binary of libsass, which need to be initialized first.
 
 ```ts
-import { loadModule } from 'hunspell-asm';
+import { loadModule } from 'libsass-asm';
 
 const sassFactory: SassFactory = await loadModule();
 ```
