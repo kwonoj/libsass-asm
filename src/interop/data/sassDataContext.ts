@@ -1,5 +1,5 @@
 import { log } from '../../util/logger';
-import { StringMethodInterface } from '../interopUtility';
+import { buildInteropUtility } from '../interopUtility';
 import { SassOptions, SassOptionsInterface } from '../options/sassOptions';
 import { SassContext, SassContextInterface } from '../sassContext';
 import { SassSourceContext } from '../SassSourceContext';
@@ -7,6 +7,8 @@ import { wrapSassContext } from '../wrapSassContext';
 
 class SassDataContext implements SassSourceContext {
   private readonly sassDataContextPtr: number;
+  private readonly inputDataPtr: number;
+
   private sassOptions: SassOptionsInterface | null;
   private sassContext: SassContextInterface | null;
 
@@ -16,10 +18,10 @@ class SassDataContext implements SassSourceContext {
   constructor(
     input: string,
     private readonly cwrapCtx: ReturnType<typeof wrapSassContext>,
-    private readonly strMethod: StringMethodInterface
+    private readonly interop: ReturnType<typeof buildInteropUtility>
   ) {
-    const inputPtr = this.strMethod.alloc(input);
-    this.sassDataContextPtr = this.cwrapCtx.make_data_context(inputPtr);
+    this.inputDataPtr = this.interop.str.alloc(input);
+    this.sassDataContextPtr = this.cwrapCtx.make_data_context(this.inputDataPtr);
     log(`SassDataContext: created new instance`, { sassDataContextPtr: this.sassDataContextPtr });
   }
 
@@ -60,7 +62,7 @@ class SassDataContext implements SassSourceContext {
 
     return !!this.sassContext
       ? this.sassContext
-      : (this.sassContext = new SassContext(sassContextPtr, this.cwrapCtx, this.strMethod) as SassContextInterface);
+      : (this.sassContext = new SassContext(sassContextPtr, this.cwrapCtx, this.interop.str) as SassContextInterface);
   }
 
   public compile(): number {
@@ -69,6 +71,7 @@ class SassDataContext implements SassSourceContext {
 
   public dispose(): void {
     this.cwrapCtx.delete_data_context(this.sassDataContextPtr);
+    this.interop.free(this.inputDataPtr);
   }
 }
 
