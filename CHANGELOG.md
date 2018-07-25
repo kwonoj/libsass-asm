@@ -1,3 +1,27 @@
+<a name="0.0.3"></a>
+## [0.0.3](https://github.com/kwonoj/libsass-asm/compare/0.0.2...0.0.3) (2018-07-25)
+
+
+### Bug Fixes
+
+* **allocstring:** use emscripten method, explicitly free ([e106327](https://github.com/kwonoj/libsass-asm/commit/e106327))
+* **sassoptions:** correct imported functions ([5781c10](https://github.com/kwonoj/libsass-asm/commit/5781c10))
+
+
+### Features
+
+* **buildimporter:** importer namespace factory ([f17707d](https://github.com/kwonoj/libsass-asm/commit/f17707d))
+* **getfnptrhandler:** wrapper to add, removefunction ([356bf24](https://github.com/kwonoj/libsass-asm/commit/356bf24))
+* **sassimportentry:** implement sassimportentry ([c099763](https://github.com/kwonoj/libsass-asm/commit/c099763))
+* **sassimportentry:** integrate makeimport ([3e8fb58](https://github.com/kwonoj/libsass-asm/commit/3e8fb58))
+* **sassimportentrylist:** implement entrylist ([84d897e](https://github.com/kwonoj/libsass-asm/commit/84d897e))
+* **sassloader:** export importer namespace ([aac6589](https://github.com/kwonoj/libsass-asm/commit/aac6589))
+* **sassloader:** export updated interface ([88ec0c6](https://github.com/kwonoj/libsass-asm/commit/88ec0c6))
+* **sassoptions:** expose importers ([4fd16e9](https://github.com/kwonoj/libsass-asm/commit/4fd16e9))
+* **wrapsassimporter:** cwrap exported functions ([dad25bb](https://github.com/kwonoj/libsass-asm/commit/dad25bb))
+
+
+
 <a name="0.0.2"></a>
 ## [0.0.2](https://github.com/kwonoj/libsass-asm/compare/0.0.1...0.0.2) (2018-07-15)
 
