@@ -25,7 +25,7 @@ const buildImporter = (
 ) => {
   return {
     importEntry: {
-      create: importEntryFactory(new SassImportEntry(cwrapImporter, interop.str, fnPtrHandler))
+      create: importEntryFactory(new SassImportEntry(cwrapImporter, interop, fnPtrHandler))
     }
   };
 };

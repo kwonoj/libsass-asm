@@ -18,18 +18,16 @@ const buildContext = (
   cwrapImporter: ReturnType<typeof wrapSassImporter>,
   interop: ReturnType<typeof buildInteropUtility>
 ) => {
-  const { str, mount, unmount } = interop;
-
   return {
     options: {
       create: () =>
-        new SassOptions(cwrapContext, cwrapOptions, cwrapImporter, mount, unmount, str) as SassOptionsInterface
+        new SassOptions(cwrapContext, cwrapOptions, cwrapImporter, interop) as SassOptionsInterface
     },
     file: {
-      create: (inputPath: string) => new SassFileContext(inputPath, cwrapContext, str) as SassSourceContext
+      create: (inputPath: string) => new SassFileContext(inputPath, cwrapContext, interop) as SassSourceContext
     },
     data: {
-      create: (input: string) => new SassDataContext(input, cwrapContext, str) as SassSourceContext
+      create: (input: string) => new SassDataContext(input, cwrapContext, interop) as SassSourceContext
     }
   };
 };

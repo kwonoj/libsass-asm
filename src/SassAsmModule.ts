@@ -12,6 +12,8 @@ interface SassAsmModule extends Required<BaseAsmModule> {
   _sass2scss_version: () => number;
   addFunction: (fn: Function) => number;
   removeFunction: (fnPtr: number) => void;
+  _free: (ptr: number) => void;
+  allocateUTF8: (str: string) => number;
 }
 
 export { SassAsmModule };

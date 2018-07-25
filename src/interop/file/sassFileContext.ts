@@ -1,5 +1,5 @@
 import { log } from '../../util/logger';
-import { StringMethodInterface } from '../interopUtility';
+import { buildInteropUtility } from '../interopUtility';
 import { SassOptions, SassOptionsInterface } from '../options/sassOptions';
 import { SassContext, SassContextInterface } from '../sassContext';
 import { SassSourceContext } from '../SassSourceContext';
@@ -10,16 +10,17 @@ import { wrapSassContext } from '../wrapSassContext';
  */
 class SassFileContext implements SassSourceContext {
   private readonly sassFileContextPtr: number;
+  private readonly inputPathPtr: number;
   private sassOptions: SassOptionsInterface | null;
   private sassContext: SassContextInterface | null;
 
   constructor(
     inputPath: string,
     private readonly cwrapCtx: ReturnType<typeof wrapSassContext>,
-    private readonly strMethod: StringMethodInterface
+    private readonly interop: ReturnType<typeof buildInteropUtility>
   ) {
-    const inputPathPtr = this.strMethod.alloc(inputPath);
-    this.sassFileContextPtr = this.cwrapCtx.make_file_context(inputPathPtr);
+    this.inputPathPtr = this.interop.str.alloc(inputPath);
+    this.sassFileContextPtr = this.cwrapCtx.make_file_context(this.inputPathPtr);
     log(`SassFileContext: created new instance`, { sassFileContextPtr: this.sassFileContextPtr });
   }
 
@@ -60,7 +61,7 @@ class SassFileContext implements SassSourceContext {
 
     return !!this.sassContext
       ? this.sassContext
-      : (this.sassContext = new SassContext(sassContextPtr, this.cwrapCtx, this.strMethod) as SassContextInterface);
+      : (this.sassContext = new SassContext(sassContextPtr, this.cwrapCtx, this.interop.str) as SassContextInterface);
   }
 
   public compile(): number {
@@ -69,6 +70,7 @@ class SassFileContext implements SassSourceContext {
 
   public dispose(): void {
     this.cwrapCtx.delete_file_context(this.sassFileContextPtr);
+    this.interop.free(this.inputPathPtr);
   }
 }
 

@@ -14,15 +14,10 @@ interface StringMethodInterface {
  * @param {SassAsmModule} asmModule
  */
 const buildInteropUtility = (asmModule: SassAsmModule) => {
-  const { FS, stackAlloc, stringToUTF8, Pointer_stringify } = asmModule;
+  const { FS, Pointer_stringify, _free, allocateUTF8 } = asmModule;
 
   const str: StringMethodInterface = {
-    alloc: (value: string) => {
-      const len = (value.length << 2) + 1;
-      const ret = stackAlloc(len);
-      stringToUTF8(value, ret, len);
-      return ret;
-    },
+    alloc: allocateUTF8,
     ptrToString: Pointer_stringify
   };
 
@@ -35,7 +30,8 @@ const buildInteropUtility = (asmModule: SassAsmModule) => {
   return {
     str,
     mount: mountPath,
-    unmount: unmountPath
+    unmount: unmountPath,
+    free: _free
   };
 };
 
