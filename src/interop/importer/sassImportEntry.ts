@@ -1,6 +1,6 @@
 import { log } from '../../util/logger';
 import { getFnPtrHandler } from '../fnPtrHandler';
-import { StringMethodInterface } from '../interopUtility';
+import { buildInteropUtility } from '../interopUtility';
 import { wrapSassImporter } from './wrapSassImporter';
 
 type importCallbackType = (
@@ -54,10 +54,14 @@ class SassImportEntry implements SassImportEntryInterface {
    * Hold pointer to function added via `addFunction`, to be removed when disposing entry instance.
    */
   private callbackPtr: number;
+  /**
+   * Hold pointers to internaly allocated strings, to be removed when disposing entry instance
+   */
+  private readonly allocatedStringPtr: Array<number> = [];
 
   constructor(
     private readonly cwrapImporter: ReturnType<typeof wrapSassImporter>,
-    private readonly strMethod: StringMethodInterface,
+    private readonly interop: ReturnType<typeof buildInteropUtility>,
     private readonly fnPtrHandler: ReturnType<typeof getFnPtrHandler>
   ) {}
 
@@ -76,13 +80,15 @@ class SassImportEntry implements SassImportEntryInterface {
   }
 
   public makeImporter(rel: string, abs: string, source: string, sourceMap: string): void {
+    const [relPtr, absPtr, sourcePtr, sourceMapPtr] = [
+      this.interop.str.alloc(rel),
+      this.interop.str.alloc(abs),
+      this.interop.str.alloc(source),
+      this.interop.str.alloc(sourceMap)
+    ];
+    this.allocatedStringPtr.push(relPtr, absPtr, sourcePtr, sourceMapPtr);
     //make_import_entry internally just calls make_import
-    this.sassImportEntryPtr = this.cwrapImporter.make_import(
-      this.strMethod.alloc(rel),
-      this.strMethod.alloc(abs),
-      this.strMethod.alloc(source),
-      this.strMethod.alloc(sourceMap)
-    );
+    this.sassImportEntryPtr = this.cwrapImporter.make_import(relPtr, absPtr, sourcePtr, sourceMapPtr);
     log(`SassImportEntry: created new instance`, { sassImportEntryPtr: this.sassImportEntryPtr });
   }
 
@@ -94,38 +100,42 @@ class SassImportEntry implements SassImportEntryInterface {
     return {
       column,
       line,
-      message: this.strMethod.ptrToString(error)
+      message: this.interop.str.ptrToString(error)
     };
   }
 
   public set error({ message, line, column }: { message: string; line: number; column: number }) {
-    const messagePtr = this.strMethod.alloc(message);
+    const messagePtr = this.interop.str.alloc(message);
+    this.allocatedStringPtr.push(messagePtr);
     this.cwrapImporter.import_set_error(this.sassImportEntryPtr, messagePtr, line, column);
   }
 
   public get importPath(): string {
     const pathPtr = this.cwrapImporter.import_get_imp_path(this.sassImportEntryPtr);
-    return this.strMethod.ptrToString(pathPtr);
+    return this.interop.str.ptrToString(pathPtr);
   }
 
   public get absPath(): string {
     const pathPtr = this.cwrapImporter.import_get_abs_path(this.sassImportEntryPtr);
-    return this.strMethod.ptrToString(pathPtr);
+    return this.interop.str.ptrToString(pathPtr);
   }
 
   public get source(): string {
     const sourcePtr = this.cwrapImporter.import_get_source(this.sassImportEntryPtr);
-    return this.strMethod.ptrToString(sourcePtr);
+    return this.interop.str.ptrToString(sourcePtr);
   }
 
   public get sourceMap(): string {
     const sourceMapPtr = this.cwrapImporter.import_get_srcmap(this.sassImportEntryPtr);
-    return this.strMethod.ptrToString(sourceMapPtr);
+    return this.interop.str.ptrToString(sourceMapPtr);
   }
 
   public dispose(): void {
     this.cwrapImporter.delete_import(this.sassImportEntryPtr);
     this.fnPtrHandler.remove(this.callbackPtr);
+
+    this.allocatedStringPtr.forEach(ptr => this.interop.free(ptr));
+    this.allocatedStringPtr.splice(0);
   }
 }
 

@@ -1,9 +1,8 @@
-import { mountDirectory, unmount } from 'emscripten-wasm-loader';
 import { log } from '../../util/logger';
 import { SassImportEntryInterface } from '../importer/sassImportEntry';
 import { SassImportEntryList } from '../importer/sassImportEntryList';
 import { wrapSassImporter } from '../importer/wrapSassImporter';
-import { StringMethodInterface } from '../interopUtility';
+import { buildInteropUtility } from '../interopUtility';
 import { wrapSassContext } from '../wrapSassContext';
 import { wrapSassOptions } from './wrapSassOptions';
 
@@ -110,6 +109,11 @@ class SassOptions implements SassOptionsInterface {
   private readonly mountedPath: Array<string> = [];
 
   /**
+   * Hold pointers to internaly allocated strings, to be removed when disposing entry instance
+   */
+  private readonly allocatedStringPtr: Array<number> = [];
+
+  /**
    * List of importers.
    */
   private importersList: SassImportEntryList | null;
@@ -126,9 +130,7 @@ class SassOptions implements SassOptionsInterface {
     private readonly cwrapCtx: ReturnType<typeof wrapSassContext>,
     private readonly cwrapOptions: ReturnType<typeof wrapSassOptions>,
     private readonly cwrapImporter: ReturnType<typeof wrapSassImporter>,
-    private readonly mount: ReturnType<typeof mountDirectory>,
-    private readonly unmountPath: ReturnType<typeof unmount>,
-    private readonly strMethod: StringMethodInterface
+    private readonly interop: ReturnType<typeof buildInteropUtility>
   ) {
     this.sassOptionsPtr = cwrapCtx.make_options();
     log(`SassOptions: created new instance`, { sassOptionsPtr: this.sassOptionsPtr });
@@ -182,29 +184,35 @@ class SassOptions implements SassOptionsInterface {
 
   public get sourceMapFile(): string {
     const mapFilePtr = this.cwrapOptions.option_get_source_map_file(this.sassOptionsPtr);
-    return this.strMethod.ptrToString(mapFilePtr);
+    return this.interop.str.ptrToString(mapFilePtr);
   }
 
   public set sourceMapFile(mapFile: string) {
-    this.cwrapOptions.option_set_source_map_file(this.sassOptionsPtr, this.strMethod.alloc(mapFile));
+    const mapFilePtr = this.interop.str.alloc(mapFile);
+    this.allocatedStringPtr.push(mapFilePtr);
+    this.cwrapOptions.option_set_source_map_file(this.sassOptionsPtr, mapFilePtr);
   }
 
   public get outputPath(): string {
     const outPathPtr = this.cwrapOptions.option_get_output_path(this.sassOptionsPtr);
-    return this.strMethod.ptrToString(outPathPtr);
+    return this.interop.str.ptrToString(outPathPtr);
   }
 
   public set outputPath(outPath: string) {
-    this.cwrapOptions.option_set_output_path(this.sassOptionsPtr, this.strMethod.alloc(outPath));
+    const outputPathPtr = this.interop.str.alloc(outPath);
+    this.allocatedStringPtr.push(outputPathPtr);
+    this.cwrapOptions.option_set_output_path(this.sassOptionsPtr, outputPathPtr);
   }
 
   public get inputPath(): string {
     const inputPathPtr = this.cwrapOptions.option_get_input_path(this.sassOptionsPtr);
-    return this.strMethod.ptrToString(inputPathPtr);
+    return this.interop.str.ptrToString(inputPathPtr);
   }
 
   public set inputPath(outPath: string) {
-    this.cwrapOptions.option_set_input_path(this.sassOptionsPtr, this.strMethod.alloc(outPath));
+    const outputPathStr = this.interop.str.alloc(outPath);
+    this.allocatedStringPtr.push(outputPathStr);
+    this.cwrapOptions.option_set_input_path(this.sassOptionsPtr, outputPathStr);
   }
 
   public get importers(): Array<SassImportEntryInterface> {
@@ -219,22 +227,29 @@ class SassOptions implements SassOptionsInterface {
   }
 
   public addIncludePath(includePath: string): void {
-    const mounted = this.mount(includePath);
+    const mounted = this.interop.mount(includePath);
     this.mountedPath.push(mounted);
 
-    this.cwrapOptions.option_push_include_path(this.sassOptionsPtr, this.strMethod.alloc(mounted));
+    const mountedPtr = this.interop.str.alloc(mounted);
+    this.allocatedStringPtr.push(mountedPtr);
+    this.cwrapOptions.option_push_include_path(this.sassOptionsPtr, mountedPtr);
   }
 
   public addPluginPath(pluginPath: string): void {
-    const mounted = this.mount(pluginPath);
+    const mounted = this.interop.mount(pluginPath);
     this.mountedPath.push(mounted);
 
-    this.cwrapOptions.option_push_plugin_path(this.sassOptionsPtr, this.strMethod.alloc(mounted));
+    const mountedPtr = this.interop.str.alloc(mounted);
+    this.allocatedStringPtr.push(mountedPtr);
+    this.cwrapOptions.option_push_plugin_path(this.sassOptionsPtr, mountedPtr);
   }
 
   public dispose(): void {
     this.cwrapCtx.delete_options(this.sassOptionsPtr);
-    this.mountedPath.forEach(p => this.unmountPath(p));
+    this.mountedPath.forEach(p => this.interop.unmount(p));
+
+    this.allocatedStringPtr.forEach(ptr => this.interop.free(ptr));
+    this.allocatedStringPtr.splice(0);
 
     log(`SassOptions: disposed instance`);
   }
