@@ -5,19 +5,30 @@ import { cwrapSignature } from 'emscripten-wasm-loader';
  *
  * https://github.com/sass/libsass/blob/master/docs/api-function.md
  */
-const wrapSassFunction = (_cwrap: cwrapSignature) => ({
+const wrapSassFunction = (cwrap: cwrapSignature) => ({
   //Sass_Function_List sass_make_function_list (size_t length);
-  make_function_list: null,
+  make_function_list: cwrap<(length: number) => number>(`sass_make_function_list`, 'number', ['number']),
   //Sass_Function_Entry sass_make_function (const char* signature, Sass_Function_Fn cb, void* cookie);
-  make_function: null,
+  make_function: cwrap<(signature: number, fn: number, cookie: number) => number>(`sass_make_function`, 'number', [
+    'number',
+    'number',
+    'number'
+  ]),
   //void sass_delete_function (Sass_Function_Entry entry);
-  delete_function: null,
+  delete_function: cwrap<(entry: number) => void>(`sass_delete_function`, null, ['number']),
   //void sass_delete_function_list (Sass_Function_List list);
-  delete_function_list: null,
+  delete_function_list: cwrap<(list: number) => void>(`sass_delete_function_list`, null, ['number']),
   //Sass_Function_Entry sass_function_get_list_entry(Sass_Function_List list, size_t pos);
-  function_get_list_entry: null,
+  function_get_list_entry: cwrap<(list: number, pos: number) => number>(`sass_function_get_list_entry`, 'number', [
+    'number',
+    'number'
+  ]),
   //void sass_function_set_list_entry(Sass_Function_List list, size_t pos, Sass_Function_Entry cb);
-  function_set_list_entry: null,
+  function_set_list_entry: cwrap<(list: number, pos: number, entry: number) => void>(
+    `sass_function_get_list_entry`,
+    null,
+    ['number', 'number', 'number']
+  ),
   //void sass_import_set_list_entry (Sass_Import_List list, size_t idx, Sass_Import_Entry entry);
   import_set_list_entry: null,
   //Sass_Import_Entry sass_import_get_list_entry (Sass_Import_List list, size_t idx);
