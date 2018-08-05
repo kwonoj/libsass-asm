@@ -1,8 +1,10 @@
 import { log } from '../../util/logger';
 import { getFnPtrHandler } from '../fnPtrHandler';
 import { buildInteropUtility } from '../interopUtility';
+import { SassImportEntryList } from './sassImportEntryList';
 import { wrapSassImporter } from './wrapSassImporter';
 
+//TODO: redefine callbacy type signature
 type importCallbackType = (
   path: string,
   importEntry: SassImportEntryInterface,
@@ -65,11 +67,22 @@ class SassImportEntry implements SassImportEntryInterface {
     private readonly fnPtrHandler: ReturnType<typeof getFnPtrHandler>
   ) {}
 
-  public makeImport(_importCallback: importCallbackType): void {
-    function boo(_path: number, _cb: number, _comp: number) {
-      //noop
+  public makeImport(importCallback: importCallbackType): void {
+    const { cwrapImporter } = this;
+    /**
+     * Callback funtion to be forwarded into `make_importer`,
+     * internally calls actual importer callback with interoped from ptr.
+     */
+    function importCallbackPtrWrapped(path: number, cb: number, comp: number) {
+      log(`importCallback invoked`, { path, cb, comp });
+      // TODO: pass interoped value from callback param
+      const importEntries = (importCallback as any)(null, null, null);
+      const list = new SassImportEntryList(cwrapImporter, importEntries.length);
+      list.entry = importEntries;
+      return list.sassImportEntryListPtr;
     }
-    this.callbackPtr = this.fnPtrHandler.add(boo);
+
+    this.callbackPtr = this.fnPtrHandler.add(importCallbackPtrWrapped, 'iiii');
     this.sassImportEntryPtr = this.cwrapImporter.make_importer(
       this.callbackPtr,
       0,
