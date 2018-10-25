@@ -199,7 +199,8 @@ const compileStdin = async (
   outputPath: { raw: string; mountedDir: string; mountedFullPath: string }
 ) => {
   const stdin = await import('get-stdin');
-  const input = await stdin();
+  const { default: defaultExport } = stdin as any;
+  const input = await (defaultExport || stdin)();
 
   const dataContext = context.data.create(input);
   const sassContext = dataContext.getContext();
@@ -272,8 +273,9 @@ const main = async (argv: Array<string> = process.argv) => {
   d(`Received options`, { options });
   if (displayHelp || displayVersion) {
     const cmdUsage = await import('command-line-usage');
+    const { default: defaultExport } = cmdUsage as any;
     const usageDefinition = displayHelp ? helpDefinitions : await buildDisplayVersion();
-    const usage = cmdUsage([...usageDefinition]);
+    const usage = (defaultExport || cmdUsage)([...usageDefinition]);
     console.log(usage);
     return 0;
   }

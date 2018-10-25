@@ -1,6 +1,6 @@
 import * as path from 'path';
-import * as uglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import * as webpack from 'webpack';
+const terserPlugin = require('terser-webpack-plugin'); //tslint:disable-line: no-require-imports no-var-requires
 
 module.exports = {
   mode: 'production',
@@ -24,30 +24,26 @@ module.exports = {
     // configuration regarding modules
     rules: [
       {
-        enforce: 'pre',
-        test: /\.ts$|\.tsx$/,
-        exclude: ['node_modules'],
+        test: /\.tsx?$/,
         loader: 'ts-loader',
+        exclude: /node_modules/,
         options: {
-          transpileOnly: true
+          transpileOnly: true,
+          compilerOptions: {
+            module: 'esnext'
+          }
         }
       }
     ]
   },
-  plugins: [
-    new uglifyJsPlugin({
-      sourceMap: true,
-      uglifyOptions: {
-        compress: {
-          ecma: 6,
-          pure_getters: true,
-          passes: 3,
-          sequences: false,
-          dead_code: true
-        },
-        output: { comments: false, beautify: false }
-      }
-    }),
-    new webpack.BannerPlugin({ banner: '#!/usr/bin/env node', raw: true })
-  ]
+
+  optimization: {
+    minimizer: [new terserPlugin()]
+  },
+
+  node: {
+    __dirname: false
+  },
+
+  plugins: [new webpack.BannerPlugin({ banner: '#!/usr/bin/env node', raw: true })]
 };
