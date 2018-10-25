@@ -17,7 +17,7 @@ jest-cld-asm.json
 tsconfg.json
 tslint.json
 wallaby.js
-dist/src/lib/README.md
+dist/src/bin/README.md
 commitlint.config.js
 tsconfig.json
 webpack.*.ts
