@@ -14,7 +14,8 @@ const loadModule = async (): Promise<SassFactory> => {
 
   //imports MODULARIZED emscripten preamble
   const runtimeModule = await import('./bin/libsass');
-  const moduleLoader = await getModuleLoader<SassFactory, SassAsmModule>(sassLoader, runtimeModule);
+  const { default: defaultModule } = runtimeModule;
+  const moduleLoader = await getModuleLoader<SassFactory, SassAsmModule>(sassLoader, defaultModule || runtimeModule);
 
   return moduleLoader();
 };

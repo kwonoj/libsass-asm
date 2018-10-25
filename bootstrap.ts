@@ -23,7 +23,7 @@ const asyncExec = promisify(exec);
 const calculateChecksumFromFile = async (filePath: string) =>
   crypto
     .createHash('sha512')
-    .update(await readFile(filePath, { encoding: 'utf-8' }), 'utf8')
+    .update(await readFile(filePath))
     .digest('hex');
 
 /**
@@ -35,30 +35,61 @@ const getRemoteChecksum = (url: string) => {
 };
 
 /**
+ * Actually download binary from remote. This is direct invocation to wget, need local wget installation.
+ *
+ */
+const downloadSingleBinary = async (libPath: string, binaryFile: { url: string; localBinaryPath: string }) => {
+  const { url } = binaryFile;
+  await asyncExec(`wget -q --directory-prefix=${libPath} ${url}`);
+
+  if (!validateBinaries([binaryFile])) {
+    throw new Error(`Downloaded binary checksum mismatch, cannot complete bootstrap`);
+  }
+};
+
+/**
+ * Compare checksum of given file between remote.
+ */
+const validateBinaries = async (binaryFiles: Array<{ url: string; localBinaryPath: string }>) => {
+  for (const binaryFile of binaryFiles) {
+    const { url, localBinaryPath } = binaryFile;
+
+    //Create checksum validator
+    const remoteChecksum = getRemoteChecksum(url);
+    const validateBinary = async () => (await calculateChecksumFromFile(localBinaryPath)) === remoteChecksum;
+    const isBinaryExists = () => fs.existsSync(localBinaryPath);
+
+    if (isBinaryExists() && (await validateBinary())) {
+      continue;
+    } else {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+/**
  * Main script execution
  */
 (async () => {
   const libPath = path.resolve('./src/bin');
-  const fileName = 'libsass.js';
-  const localBinarypath = path.join(libPath, fileName);
+  const binaryFiles = [`libsass.js`, `libsass.wasm`].map(fileName => ({
+    url: `https://github.com/kwonoj/docker-libsass-wasm/releases/download/${version}/${fileName}`,
+    localBinaryPath: path.join(libPath, fileName),
+    type: path.extname(fileName) === '.js' ? 'hex' : ('binary' as crypto.HexBase64Latin1Encoding)
+  }));
 
-  const url = `https://github.com/kwonoj/docker-libsass-wasm/releases/download/${version}/${fileName}`;
+  const isBinaryValid = await validateBinaries(binaryFiles);
 
-  //Create checksum validator
-  const remoteChecksum = getRemoteChecksum(url);
-  const validateBinary = async () => (await calculateChecksumFromFile(localBinarypath)) === remoteChecksum;
-  const isBinaryExists = () => fs.existsSync(localBinarypath);
+  if (!isBinaryValid) {
+    rm('-f', path.join(libPath, 'libsass.js'));
+    rm('-f', path.join(libPath, 'libsass.wasm'));
 
-  if (isBinaryExists() && (await validateBinary())) {
-    return;
-  }
+    console.log(`Downloading libsass wasm binary version '${version}'`);
 
-  console.log(`Downloading libsass wasm binary version '${version}'`);
-
-  rm('-f', path.join(libPath, fileName));
-  await asyncExec(`wget -q --directory-prefix=${libPath} ${url}`);
-
-  if (!isBinaryExists() || !(await validateBinary())) {
-    throw new Error(`Downloaded binary checksum mismatch, cannot complete bootstrap`);
+    for (const singleFile of binaryFiles) {
+      await downloadSingleBinary(libPath, singleFile);
+    }
   }
 })();
