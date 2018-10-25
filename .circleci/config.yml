@@ -42,8 +42,8 @@ jobs:
 
   sassspec:
     docker:
-    - image: circleci/node:9-browsers
-    working_directory: ~/node9
+    - image: circleci/node:10-browsers
+    working_directory: ~/node10
     steps:
       - checkout
       - run:
