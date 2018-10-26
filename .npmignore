@@ -7,7 +7,7 @@ typings/
 .vscode/
 src/
 test/
-!dist/src
+dist/spec
 examples/
 symbols/
 .travis.yml
