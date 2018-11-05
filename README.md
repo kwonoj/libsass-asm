@@ -77,7 +77,7 @@ WebAssembly binary's memory space is separately allocated and cannot use node.js
 
 All of `virtual` paths for mounted filesystem uses unix separator regardless of platform.
 
-Note when setting options for libsass, it should be mounted path instead of phsyical path since libsass will try to read via mounted path only.
+Note when setting options for libsass, it should be mounted path instead of physical path since libsass will try to read via mounted path only.
 
 ```ts
 const inputFile = path.resolve('./input.scss');
